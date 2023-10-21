@@ -195,7 +195,7 @@ def save_graph(figure_folder=None, fig_name=None, legend="", close_restart_verba
 def task_5(graph: nx.Graph):
     """Global clustering coefficient
     """
-    print(nx.transitivity(graph))
+    print(f"Graph clustering coefficient: {nx.transitivity(graph):.3f}")
 
 
 
@@ -325,21 +325,20 @@ def question_3(figure_folder=None):
     )
 
 if __name__ == "__main__":
-    # DATASET_FOLDER = Path("code/datasets")
     dataset_folder = Path(__file__).parent/".."/"datasets"
     figures_folder = Path(__file__).parent/".."/".."/"report"/"figures"
     figures_folder.mkdir(parents=True, exist_ok=True)
     edges_file = dataset_folder/"CA-HepTh.txt"
 
-    latex_mode = True
+    latex_mode = False
 
-    # graph = load_graph(edges_file)
-    # stats = {}
-    # stats = task_1(graph)
-    # task_2(graph, stats=stats)
-    # task_3(graph)
-    # task_4(graph, output_path=None if not latex_mode else figures_folder)
-    # task_5(graph)
+    graph = load_graph(edges_file)
+    stats = {}
+    stats = task_1(graph)
+    task_2(graph, stats=stats)
+    task_3(graph)
+    task_4(graph, output_path=None if not latex_mode else figures_folder)
+    task_5(graph)
 
     # question_2(figure_folder=figures_folder)
-    question_3(figure_folder=figures_folder)
+    # question_3(figure_folder=figures_folder)
