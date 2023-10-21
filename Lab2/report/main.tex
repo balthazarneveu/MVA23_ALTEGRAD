@@ -114,13 +114,28 @@ which is the most pleasant example to visualize.
 \end{figure}
 
 
-
 \begin{figure}[ht]
     \centering
     \includegraphics[width=.6\textwidth]{figures/graph_compare_quad.png}
     \caption{Counter example where all nodes have a degree of 3.G1=(a-b, b-c, c-a, b-d, d-c, d-a) is a rectangle with its diagonalsG2=(u-v, u-u, v-v, w-x, w-w, x-x) are 2 segment where the end nodes have self loops}
     \label{fig:graph_compare_quad}
 \end{figure}
+
+\pagebreak
+\subsection*{Question 3 : n-cycle graphs}
+\begin{itemize}
+    \item Clustering coefficient of the triangle $C_3$ is $1=\frac{1}{1+0}$
+    \item Clustering coefficient of cycle graphs $C_n$ where $n \geq 4$ is $0=\frac{0}{0+(n-2)}$
+    as there are no closed triplets but only ($n-2$) open triplets 
+\end{itemize}
+\begin{figure}[ht]
+        \centering
+        \includegraphics[width=.6\textwidth]{figures/cycle_graphs.png}
+        \caption{Transitivity of $C_n$ cycle graphs becomes 0 if $n \geq 4$}
+        \label{fig:cycle_graphs}
+\end{figure}
+
+
 
 
 %------------------------------------------------

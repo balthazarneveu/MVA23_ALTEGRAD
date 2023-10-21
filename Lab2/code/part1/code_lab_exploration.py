@@ -195,14 +195,19 @@ def save_graph(figure_folder=None, fig_name=None, legend="", close_restart_verba
 def task_5(graph: nx.Graph):
     """Global clustering coefficient
     """
-    pass
+    print(nx.transitivity(graph))
 
 
 
 ############## Question 2
-def visualize_graph(ax: plt.Axes, graph: nx.Graph, title, color='lightgreen'):
+def visualize_graph(
+        ax: plt.Axes,
+        graph: nx.Graph,
+        title,
+        color='lightgreen',
+        properties=["degree"]):
     """Utility function to visualize a graph with a given title."""
-    degree_distribution = [f"{graph.degree(node):d}" for node in graph.nodes()]
+    
     nx.draw(
         graph,
         # pos,
@@ -212,27 +217,38 @@ def visualize_graph(ax: plt.Axes, graph: nx.Graph, title, color='lightgreen'):
         node_color=color,
         font_size=15
     )
-    title += "\nDegree distribution:" + " ".join(degree_distribution)
+    if "degree" in properties:
+        degree_distribution = [f"{graph.degree(node):d}" for node in graph.nodes()]
+        title += "\nDegree distribution:" + " ".join(degree_distribution)
+    if "transitivity" in properties:
+        transitivity = nx.transitivity(graph)
+        title += f"\nTransitivity: {transitivity:.3f}"
     ax.set_title(title)
 
 def create_graph_comparison(
-        graph_1_def = [('a', 'b'), ('b', 'c'), ('c', 'd'), ('d', 'a')],
-        graph_2_def = [('w', 'x'), ('x', 'y'), ('y', 'w'), ('z', 'z')],
+        graph_def = [
+            [('a', 'b'), ('b', 'c'), ('c', 'd'), ('d', 'a')],
+            [('w', 'x'), ('x', 'y'), ('y', 'w'), ('z', 'z')]
+        ],
         figure_folder=None,
         legend="",
-        fig_name="graph_comparison.png"
+        graph_names = ["Graph G1", "Graph G2"],
+        colors=['lightblue', 'lightgreen'],
+        fig_name="graph_comparison.png",
+        properties=["degree"],
     ):
-    # Define graph G1
-    fig, axs = plt.subplots(1, 2, figsize=(10, 5))
-    graph_1 = nx.Graph()
-    graph_1.add_edges_from(graph_1_def)
-    visualize_graph(axs[0], graph_1, "Graph G1", color='lightblue')
-    print()
-
-    # Define graph G2
-    graph_2 = nx.Graph()
-    graph_2.add_edges_from(graph_2_def)
-    visualize_graph(axs[1], graph_2, "Graph G2", color='lightgreen')
+    
+    fig, axs = plt.subplots(1, len(graph_def), figsize=(len(graph_def)*5, 5))
+    for index, graph_x_def in enumerate(graph_def):
+        graph_x = nx.Graph()
+        graph_x.add_edges_from(graph_x_def)
+        visualize_graph(
+            axs[index],
+            graph_x,
+            graph_names[index],
+            color=colors[index%2],
+            properties=properties
+        )
     save_graph(
         figure_folder=figure_folder,
         fig_name=fig_name,
@@ -242,11 +258,13 @@ def create_graph_comparison(
 
 @task
 def question_2(figure_folder=None):
-    r"""2 graphs having the same degree distribution $\notimplies$ isomorphic$
+    r"""2 graphs having the same degree distribution $\not \implies$ isomorphic$
     """
     create_graph_comparison(
-        graph_1_def = [('a', 'b'), ('b', 'c'), ('c', 'a')],
-        graph_2_def = [('w', 'w'), ('x', 'x'), ('y', 'y')],
+        graph_def = [
+            [('a', 'b'), ('b', 'c'), ('c', 'a')],
+            [('w', 'w'), ('x', 'x'), ('y', 'y')]
+        ],
         figure_folder=figure_folder,
         fig_name="graph_triangle_vs_three_single_loops.png",
         legend="Graphs G1 is a triangle and G2 is made of 3 isolated nodes with a self loop."+ 
@@ -254,16 +272,20 @@ def question_2(figure_folder=None):
         "but are not isomorphic to each other.",
     )
     create_graph_comparison(
-        graph_1_def = [('a', 'b'), ('b', 'c'), ('c', 'd'), ('d', 'a')],
-        graph_2_def = [('w', 'x'), ('x', 'y'), ('y', 'w'), ('z', 'z')],
+        graph_def = [
+            [('a', 'b'), ('b', 'c'), ('c', 'd'), ('d', 'a')],
+            [('w', 'x'), ('x', 'y'), ('y', 'w'), ('z', 'z')]
+        ],
         figure_folder=figure_folder,
         legend="G1 is a rectangle, G2 is made of a triangle and a single node with a self loop.",
         fig_name="graph_rect_vs_triangle_plus_single_loop.png")
         
 
     create_graph_comparison(
-        graph_1_def = [('a', 'b'), ('b', 'c'), ('c', 'd'), ('d', 'e'), ('e', 'f'), ('f', 'a')],
-        graph_2_def = [('u', 'v'), ('v', 'w'), ('w', 'u'), ('x', 'y'), ('y', 'z'), ('z', 'x')],
+        graph_def = [
+            [('a', 'b'), ('b', 'c'), ('c', 'd'), ('d', 'e'), ('e', 'f'), ('f', 'a')],
+            [('u', 'v'), ('v', 'w'), ('w', 'u'), ('x', 'y'), ('y', 'z'), ('z', 'x')],
+        ],
         figure_folder=figure_folder,
         legend="G1 is an hexagon, it has 6 edges. G2 has 2 separate triangles."+
         "All nodes have a degree of 2, G1 and G2 have the same degree histograms." +
@@ -271,16 +293,36 @@ def question_2(figure_folder=None):
         fig_name="graph_compare_triangle_hexagon.png"
     )
     create_graph_comparison(
-        graph_1_def = [('a', 'b'), ('b', 'c'), ('c', 'a'), ('b', 'd'), ('d', 'c'), ('d', 'a')],
-        graph_2_def = [('u', 'v'), ('u', 'u'), ('v', 'v'), ('w', 'x'), ('w', 'w'), ('x', 'x')],
+        graph_def = [
+            [('a', 'b'), ('b', 'c'), ('c', 'a'), ('b', 'd'), ('d', 'c'), ('d', 'a')],
+            [('u', 'v'), ('u', 'u'), ('v', 'v'), ('w', 'x'), ('w', 'w'), ('x', 'x')],
+        ],
         figure_folder=figure_folder,
         fig_name="graph_compare_quad.png",
         legend="Counter example where all nodes have a degree of 3."+ 
         "G1=(a-b, b-c, c-a, b-d, d-c, d-a) is a rectangle with its diagonals" + 
         "G2=(u-v, u-u, v-v, w-x, w-w, x-x) are 2 segment where the end nodes have self loops"
-
     )
     pass
+
+
+@task
+def question_3(figure_folder=None):
+    r"""n-cycle graphs
+    """
+    create_graph_comparison(
+        graph_def = [
+            [('a', 'b'), ('b', 'c'), ('c', 'a')],
+            [('a', 'b'), ('b', 'c'), ('c', 'd'), ('d', 'a')],
+            [('a', 'b'), ('b', 'c'), ('c', 'd'), ('d', 'e'), ('e', 'a')],
+            [('a', 'b'), ('b', 'c'), ('c', 'd'), ('d', 'e'), ('e', 'f'), ('f', 'a')]
+        ],
+        graph_names = ["Graph C3", "Graph C4", "Graph C5", "Graph C6"],
+        figure_folder=figure_folder,
+        fig_name="cycle_graphs.png",
+        legend="Transitivity of $C_n$ cycle graphs becomes 0 if $n\seq4$",
+        properties=["transitivity"]
+    )
 
 if __name__ == "__main__":
     # DATASET_FOLDER = Path("code/datasets")
@@ -291,12 +333,13 @@ if __name__ == "__main__":
 
     latex_mode = True
 
-    graph = load_graph(edges_file)
-    stats = {}
-    stats = task_1(graph)
-    task_2(graph, stats=stats)
-    task_3(graph)
-    task_4(graph, output_path=None if not latex_mode else figures_folder)
-    task_5(graph)
+    # graph = load_graph(edges_file)
+    # stats = {}
+    # stats = task_1(graph)
+    # task_2(graph, stats=stats)
+    # task_3(graph)
+    # task_4(graph, output_path=None if not latex_mode else figures_folder)
+    # task_5(graph)
 
     # question_2(figure_folder=figures_folder)
+    question_3(figure_folder=figures_folder)
