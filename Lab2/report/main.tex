@@ -20,8 +20,29 @@
 %	ASSIGNMENT CONTENT (add your responses)
 %-------------------------------
 \section{Question 1:}
+Assume $G = (V, E)$ is an undirected graph of n nodes without self-loops. $|V|=n$.
+\subsection*{Number of edges}
+The maximum number of edges is the cardinal of the set of possible combinations of 2 nodes chosen from n nodes.
+which is equal to the binomial coefficient $\binom{n}{2} = \frac{n!}{2! (n-2)!}$
+\begin{equation}\label{eq 1.1}
+|E| \leq \frac{n*(n-1)}{2}
+\end{equation}
+This can also be viewed when writing the adjacency matrix of a complete graph.
+\begin{itemize}
+    \item  A matrix full of 1 has $n^2$ elements
+    \item set the diagonal to 0 to remove the self loops. $n*(n-1)$ elements
+    \item Divide by two since we consider an undirected graph.
+\end{itemize}
 
 
+In the code the property is verified through an assert.
+
+\subsection*{Number of triangles}
+The maximum number of triangles is $\binom{n}{3} = \frac{n!}{3! * (n-3)!} = \frac{n*(n-1)(n-2)}{6}$ 
+when choosing the combination of 3 nodes from n nodes.
+
+
+\section{Question 1:}
 %------------------------------------------------
 
 \bibliographystyle{plain}

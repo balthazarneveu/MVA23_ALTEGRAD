@@ -16,17 +16,20 @@ def load_graph(edge_path: Path) -> nx.Graph:
 
 def get_stats(graph: nx.Graph):
     stats = {
-        "#nodes": len(graph.nodes),
-        "#edges": len(graph.edges)
+        "total_nodes": len(graph.nodes),
+        "total_edges": len(graph.edges)
     }
+
     return stats
 
 
 def task_1(path: Path):
     graph = load_graph(path)
     stats = get_stats(graph)
-    # print(stats)
+    n = stats["total_nodes"]
+    assert stats["total_edges"] <= n*(n-1)//2, "max number of edges not respected" # Question 1.1
     pprint.pprint(stats, width=10)
+    print("max number of edges", n*(n-1)//2)
 
 if __name__ == "__main__":
     
