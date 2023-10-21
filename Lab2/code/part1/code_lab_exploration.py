@@ -12,13 +12,23 @@ import functools
 latex_mode = False
 
 def task(func: Callable):
-    """Wrapper to split the results between tasks while printing"""
+    """Wrapper to split the results between tasks while printing
+    When using the latex flag, it automatically adds the right latex
+    language words:
+    -Section name:
+        - task_xx is deduced from the function name
+        - description comes from the first line of the docstring
+    - all prints will be translated to vertbatim so it looks like a command line log
+    
+    Author: Balthazar Neveu
+    """
     @functools.wraps(func)
     def wrapper(*args, **kwargs):
         global latex_mode
         if latex_mode:
             sec_name = " ".join(func.__name__.split("_"))
             sec_name = sec_name.capitalize()
+            sec_name += " : " + func.__doc__.split("\n")[0]
             print(r"\subsection*{%s}"%(sec_name))
             print(r"\begin{verbatim}")
             
@@ -34,15 +44,16 @@ def task(func: Callable):
         return results
     return wrapper
 
-def include_latex_figure(fig_name, legend):
+def include_latex_figure(fig_name, legend, close_restart_verbatim=True):
+    """Latex code to include a matplotlib generated figure"""
     fig_desc = [
-        r"\end{verbatim}"
+        r"\end{verbatim}" if close_restart_verbatim else "",
         r"\begin{figure}[ht]",
         "\t"+r"\centering",
         "\t"+r"\includegraphics[width=.6\textwidth]{figures/%s}"%fig_name,
         "\t"+r"\caption{%s}"%legend,
         r"\end{figure}",
-        r"\begin{verbatim}"
+        r"\begin{verbatim}" if close_restart_verbatim else ""
     ]
     print("\n".join(fig_desc))
 
