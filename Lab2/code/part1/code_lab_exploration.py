@@ -7,18 +7,44 @@ import matplotlib.pyplot as plt
 import numpy as np
 from pathlib import Path
 import pprint
-from typing import Callable
+from typing import Callable, Optional
 import functools
-
+latex_mode = False
 
 def task(func: Callable):
     """Wrapper to split the results between tasks while printing"""
     @functools.wraps(func)
     def wrapper(*args, **kwargs):
-        print(40 * "_" + f" {func.__name__}" + 40 * "_")
-        return func(*args, **kwargs)
+        global latex_mode
+        if latex_mode:
+            sec_name = " ".join(func.__name__.split("_"))
+            sec_name = sec_name.capitalize()
+            print(r"\subsection*{%s}"%(sec_name))
+            print(r"\begin{verbatim}")
+            
+        else:
+            # Command line style
+            print(40 * "-" + f" {func.__name__} " + 40 * "-")
+            print(func.__doc__.split("\n")[0])
+            print((len(func.__name__) + 2+ 80) * "_")
+        results = func(*args, **kwargs)
+        if latex_mode:
+            print(r"\end{verbatim}")
+        print("\n")
+        return results
     return wrapper
 
+def include_latex_figure(fig_name, legend):
+    fig_desc = [
+        r"\end{verbatim}"
+        r"\begin{figure}[ht]",
+        "\t"+r"\centering",
+        "\t"+r"\includegraphics[width=.6\textwidth]{figures/%s}"%fig_name,
+        "\t"+r"\caption{%s}"%legend,
+        r"\end{figure}",
+        r"\begin{verbatim}"
+    ]
+    print("\n".join(fig_desc))
 
 ############## Task 1
 def load_graph(edge_path: Path) -> nx.Graph:
@@ -38,7 +64,8 @@ def get_stats(graph: nx.Graph):
 
 @task
 def task_1(graph: nx.Graph) -> dict:
-    """
+    """Basic graph statistics extraction
+    Extract basic statitics from the graphs
     Furthermore, compute and print
     the following network characteristics: (1) number of nodes, (2) number of edges
     Return stats
@@ -54,7 +81,8 @@ def task_1(graph: nx.Graph) -> dict:
 ############## Task 2
 @task
 def task_2(graph: nx.Graph, stats=None):
-    """Print the number of connected components. 
+    """Extract the connected components of the graph
+    Print the number of connected components. 
     If the graph is not connected, 
     Retrieve the largest connected component subgraph (also known as giant connected component)
     Find the number of nodes and edges of the largest connected component 
@@ -78,30 +106,82 @@ def task_2(graph: nx.Graph, stats=None):
               " of the graph")
 
 ############## Task 3
+def stats_array(sequence:np.ndarray, stat: dict={}, title="degree_of_nodes"):
+    stat[title] = {}
+    for stat_type in ["min", "max", "median", "mean"]:
+        stat[title][stat_type] = getattr(np, stat_type)(sequence)
+    return stat
+
 @task
 def task_3(graph: nx.Graph):
+    """Statistics on the degrees of the nodes of the graph
+    Find and print the minimum, maximum, median and mean degree
+    of the nodes of the graph
+    """
     degree_sequence = [graph.degree(node) for node in graph.nodes()]
-    pass
+    stats_degree = stats_array(np.array(degree_sequence))
+    pprint.pprint(stats_degree, width=-1)
+    return stats_degree
 
 
 ############## Task 4
 @task
-def task_4(graph: nx.Graph):
-    pass
+def task_4(graph: nx.Graph, output_path: Optional[Path]=None):
+    """Degree histogram plot
+    Plot the degree histogram using the matplotlib library of Python
+    (Hint: use the degree histogram() function that returns 
+    a list of the frequency of each degree value).
+    Produce again the plot using log-log axis
+    """
+    degree_count = nx.degree_histogram(graph)
+    degree_density = np.array(degree_count).astype(np.float64)
+    degree_density /= degree_density.sum()
+    degree_axis = np.arange(len(degree_count))
+    fig, axs = plt.subplots(1, 2, figsize=(10, 5))
+    for idx, graph_type in enumerate(["", "log"]):
+        ax = axs[idx]
+        ax.plot(degree_axis[1:], degree_density[1:])
+        if idx == 1:
+            ax.set_xscale(graph_type)
+            ax.set_yscale(graph_type)
+        ax.set_xlabel(graph_type + " Degree of node")
+        ax.set_ylabel(graph_type + " Density")
+        ax.set_title(f"{graph_type}-{graph_type} histogram of the degrees of the nodes")
+        ax.grid()
+    
+    if output_path is not None:
+        fig_name = "histogram_degree_of_nodes.png"
+        fig_path = output_path/fig_name
+        plt.savefig(fig_path)
+        global latex_mode
+        if not latex_mode:
+            print(f"Saving {fig_path}")
+        
+        if latex_mode:
+            include_latex_figure(
+                fig_name,
+                "Histogram of degrees of the nodes"
+            )
+    plt.show()
 
 ############## Task 5
 @task
 def task_5(graph: nx.Graph):
+    """Global clustering coefficient
+    """
     pass
 
 if __name__ == "__main__":
+    latex_mode = True
     # DATASET_FOLDER = Path("code/datasets")
     dataset_folder = Path(__file__).parent/".."/"datasets"
+    figures_folder = Path(__file__).parent/".."/".."/"report"/"figures"
+    figures_folder.mkdir(parents=True, exist_ok=True)
     edges_file = dataset_folder/"CA-HepTh.txt"
     graph = load_graph(edges_file)
     stats = {}
     stats = task_1(graph)
     task_2(graph, stats=stats)
     task_3(graph)
-    task_4(graph)
+    task_4(graph, output_path=None if not latex_mode else figures_folder)
     task_5(graph)

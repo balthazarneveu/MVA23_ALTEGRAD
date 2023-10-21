@@ -1,24 +1,54 @@
 \documentclass[a4paper]{article} 
 \input{style/head.tex}
-
-%-------------------------------
-%	TITLE VARIABLES (identify your work!)
-%-------------------------------
-
 \newcommand{\yourname}{Balthazar Neveu}
 \newcommand{\youremail}{balthazarneveu@gmail.com}
 \newcommand{\assignmentnumber}{2}
 
 \begin{document}
 
-%-------------------------------
-%	TITLE SECTION (do not modify unless you really need to)
-%-------------------------------
 \input{style/header.tex}
 
-%-------------------------------
-%	ASSIGNMENT CONTENT (add your responses)
-%-------------------------------
+\section*{Coding results}
+
+\subsection*{Task 1}
+\begin{verbatim}
+{'total_edges': 25998,
+ 'total_nodes': 9877}
+max number of edges 48772626
+\end{verbatim}
+
+
+\subsection*{Task 2}
+\begin{verbatim}
+Graph has 429 connected components
+Largest connected component:
+{'total_edges': 24827,
+ 'total_nodes': 8638}
+8638 total_nodes represent 87.46% of the graph
+24827 total_edges represent 95.50% of the graph
+\end{verbatim}
+
+
+\subsection*{Task 3}
+\begin{verbatim}
+{'degree_of_nodes': {'max': 65,
+                     'mean': 5.264351523742027,
+                     'median': 3.0,
+                     'min': 1}}
+\end{verbatim}
+
+
+\subsection*{Task 4}
+\begin{verbatim}
+\end{verbatim}\begin{figure}[ht]
+        \centering
+        \includegraphics[width=.6\textwidth]{figures/histogram_degree_of_nodes.png}
+        \caption{Histogram of degrees of the nodes}
+\end{figure}
+\begin{verbatim}
+\end{verbatim}
+
+
 \section{Question 1:}
 Assume $G = (V, E)$ is an undirected graph of n nodes without self-loops. $|V|=n$.
 \subsection*{Number of edges}
@@ -46,6 +76,5 @@ when choosing the combination of 3 nodes from n nodes.
 %------------------------------------------------
 
 \bibliographystyle{plain}
-\bibliography{references} % citation records are in the references.bib document
-
+\bibliography{references}
 \end{document}
