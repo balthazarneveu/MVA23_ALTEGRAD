@@ -77,7 +77,52 @@ The maximum number of triangles is $\binom{n}{3} = \frac{n!}{3! * (n-3)!} = \fra
 when choosing the combination of 3 nodes from n nodes.
 
 
-\section{Question 2:}
+\section{Question 2 : 2 graphs having the same degree distribution $\not \implies$ isomorphic}
+If two graphs have the same degree distribution, it does not imply that they are isomorphic to each other.
+The simplest counter-example with degrees of nodes of 2 is presented 
+in \ref{fig:graph_triangle_vs_three_single_loops},
+it's a bit of a degenerate case as we're using the fact that a loop adds two to the degree in case of undirected graphs.
+Below are four cases illustrating the counter example.
+\ref{fig:graph_compare_triangle_hexagon} shows an hexagon versus 2 triangles 
+which is the most pleasant example to visualize.
+
+
+
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=.6\textwidth]{figures/graph_triangle_vs_three_single_loops.png}
+    \caption{Graphs G1 is a triangle and G2 is made of 3 isolated nodes with a self loop.They have the same degree distribution (every node has a degree of 2)but are not isomorphic to each other.}
+    \label{fig:graph_triangle_vs_three_single_loops}
+\end{figure}
+
+
+
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=.6\textwidth]{figures/graph_rect_vs_triangle_plus_single_loop.png}
+    \caption{G1 is a rectangle, G2 is made of a triangle and a single node with a self loop.}
+    \label{fig:graph_rect_vs_triangle_plus_single_loop}
+\end{figure}
+
+
+
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=.6\textwidth]{figures/graph_compare_triangle_hexagon.png}
+    \caption{G1 is an hexagon, it has 6 edges. G2 has 2 separate triangles.All nodes have a degree of 2, G1 and G2 have the same degree histograms.But they are not isomorphic to each other}
+    \label{fig:graph_compare_triangle_hexagon}
+\end{figure}
+
+
+
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=.6\textwidth]{figures/graph_compare_quad.png}
+    \caption{Counter example where all nodes have a degree of 3.G1=(a-b, b-c, c-a, b-d, d-c, d-a) is a rectangle with its diagonalsG2=(u-v, u-u, v-v, w-x, w-w, x-x) are 2 segment where the end nodes have self loops}
+    \label{fig:graph_compare_quad}
+\end{figure}
+
+
 %------------------------------------------------
 
 \bibliographystyle{plain}

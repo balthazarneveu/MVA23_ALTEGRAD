@@ -11,6 +11,9 @@ from typing import Callable, Optional
 import functools
 latex_mode = False
 
+# ______________________________________________________________________________
+# REPORT HELPERS
+# ______________________________________________________________________________
 def task(func: Callable):
     """Wrapper to split the results between tasks while printing
     When using the latex flag, it automatically adds the right latex
@@ -44,7 +47,7 @@ def task(func: Callable):
         return results
     return wrapper
 
-def include_latex_figure(fig_name, legend, close_restart_verbatim=True):
+def include_latex_figure(fig_name, legend, close_restart_verbatim=True, label=None):
     """Latex code to include a matplotlib generated figure"""
     fig_desc = [
         r"\end{verbatim}" if close_restart_verbatim else "",
@@ -52,10 +55,13 @@ def include_latex_figure(fig_name, legend, close_restart_verbatim=True):
         "\t"+r"\centering",
         "\t"+r"\includegraphics[width=.6\textwidth]{figures/%s}"%fig_name,
         "\t"+r"\caption{%s}"%legend,
+        ("\t"+ r"\label{fig:%s}"%label) if label is not None else "",
         r"\end{figure}",
         r"\begin{verbatim}" if close_restart_verbatim else ""
     ]
     print("\n".join(fig_desc))
+# ______________________________________________________________________________
+
 
 ############## Task 1
 def load_graph(edge_path: Path) -> nx.Graph:
@@ -159,10 +165,16 @@ def task_4(graph: nx.Graph, output_path: Optional[Path]=None):
         ax.set_ylabel(graph_type + " Density")
         ax.set_title(f"{graph_type}-{graph_type} histogram of the degrees of the nodes")
         ax.grid()
+    save_graph(
+        figure_folder=output_path,
+        fig_name="histogram_degree_of_nodes.png",
+        legend="Histogram of degrees of the nodes",
+    )
     
-    if output_path is not None:
-        fig_name = "histogram_degree_of_nodes.png"
-        fig_path = output_path/fig_name
+def save_graph(figure_folder=None, fig_name=None, legend="", close_restart_verbatim=True):
+    if figure_folder is not None:
+        assert fig_name is not None
+        fig_path = figure_folder/fig_name
         plt.savefig(fig_path)
         global latex_mode
         if not latex_mode:
@@ -171,9 +183,12 @@ def task_4(graph: nx.Graph, output_path: Optional[Path]=None):
         if latex_mode:
             include_latex_figure(
                 fig_name,
-                "Histogram of degrees of the nodes"
+                legend,
+                close_restart_verbatim=close_restart_verbatim,
+                label=fig_name.replace(".png", "")
             )
-    plt.show()
+    else:
+        plt.show()
 
 ############## Task 5
 @task
@@ -182,13 +197,100 @@ def task_5(graph: nx.Graph):
     """
     pass
 
+
+
+############## Question 2
+def visualize_graph(ax: plt.Axes, graph: nx.Graph, title, color='lightgreen'):
+    """Utility function to visualize a graph with a given title."""
+    degree_distribution = [f"{graph.degree(node):d}" for node in graph.nodes()]
+    nx.draw(
+        graph,
+        # pos,
+        ax=ax,
+        with_labels=True,
+        node_size=700,
+        node_color=color,
+        font_size=15
+    )
+    title += "\nDegree distribution:" + " ".join(degree_distribution)
+    ax.set_title(title)
+
+def create_graph_comparison(
+        graph_1_def = [('a', 'b'), ('b', 'c'), ('c', 'd'), ('d', 'a')],
+        graph_2_def = [('w', 'x'), ('x', 'y'), ('y', 'w'), ('z', 'z')],
+        figure_folder=None,
+        legend="",
+        fig_name="graph_comparison.png"
+    ):
+    # Define graph G1
+    fig, axs = plt.subplots(1, 2, figsize=(10, 5))
+    graph_1 = nx.Graph()
+    graph_1.add_edges_from(graph_1_def)
+    visualize_graph(axs[0], graph_1, "Graph G1", color='lightblue')
+    print()
+
+    # Define graph G2
+    graph_2 = nx.Graph()
+    graph_2.add_edges_from(graph_2_def)
+    visualize_graph(axs[1], graph_2, "Graph G2", color='lightgreen')
+    save_graph(
+        figure_folder=figure_folder,
+        fig_name=fig_name,
+        legend=legend,
+        close_restart_verbatim=False,
+    )
+
+@task
+def question_2(figure_folder=None):
+    r"""2 graphs having the same degree distribution $\notimplies$ isomorphic$
+    """
+    create_graph_comparison(
+        graph_1_def = [('a', 'b'), ('b', 'c'), ('c', 'a')],
+        graph_2_def = [('w', 'w'), ('x', 'x'), ('y', 'y')],
+        figure_folder=figure_folder,
+        fig_name="graph_triangle_vs_three_single_loops.png",
+        legend="Graphs G1 is a triangle and G2 is made of 3 isolated nodes with a self loop."+ 
+        "They have the same degree distribution (every node has a degree of 2)"+
+        "but are not isomorphic to each other.",
+    )
+    create_graph_comparison(
+        graph_1_def = [('a', 'b'), ('b', 'c'), ('c', 'd'), ('d', 'a')],
+        graph_2_def = [('w', 'x'), ('x', 'y'), ('y', 'w'), ('z', 'z')],
+        figure_folder=figure_folder,
+        legend="G1 is a rectangle, G2 is made of a triangle and a single node with a self loop.",
+        fig_name="graph_rect_vs_triangle_plus_single_loop.png")
+        
+
+    create_graph_comparison(
+        graph_1_def = [('a', 'b'), ('b', 'c'), ('c', 'd'), ('d', 'e'), ('e', 'f'), ('f', 'a')],
+        graph_2_def = [('u', 'v'), ('v', 'w'), ('w', 'u'), ('x', 'y'), ('y', 'z'), ('z', 'x')],
+        figure_folder=figure_folder,
+        legend="G1 is an hexagon, it has 6 edges. G2 has 2 separate triangles."+
+        "All nodes have a degree of 2, G1 and G2 have the same degree histograms." +
+        "But they are not isomorphic to each other",
+        fig_name="graph_compare_triangle_hexagon.png"
+    )
+    create_graph_comparison(
+        graph_1_def = [('a', 'b'), ('b', 'c'), ('c', 'a'), ('b', 'd'), ('d', 'c'), ('d', 'a')],
+        graph_2_def = [('u', 'v'), ('u', 'u'), ('v', 'v'), ('w', 'x'), ('w', 'w'), ('x', 'x')],
+        figure_folder=figure_folder,
+        fig_name="graph_compare_quad.png",
+        legend="Counter example where all nodes have a degree of 3."+ 
+        "G1=(a-b, b-c, c-a, b-d, d-c, d-a) is a rectangle with its diagonals" + 
+        "G2=(u-v, u-u, v-v, w-x, w-w, x-x) are 2 segment where the end nodes have self loops"
+
+    )
+    pass
+
 if __name__ == "__main__":
-    latex_mode = True
     # DATASET_FOLDER = Path("code/datasets")
     dataset_folder = Path(__file__).parent/".."/"datasets"
     figures_folder = Path(__file__).parent/".."/".."/"report"/"figures"
     figures_folder.mkdir(parents=True, exist_ok=True)
     edges_file = dataset_folder/"CA-HepTh.txt"
+
+    latex_mode = True
+
     graph = load_graph(edges_file)
     stats = {}
     stats = task_1(graph)
@@ -196,3 +298,5 @@ if __name__ == "__main__":
     task_3(graph)
     task_4(graph, output_path=None if not latex_mode else figures_folder)
     task_5(graph)
+
+    # question_2(figure_folder=figures_folder)
