@@ -70,18 +70,23 @@ def visualize_graph(
         graph: nx.Graph,
         title,
         color='lightgreen',
-        properties=["degree"]):
+        properties=["degree"],
+        weights=False):
     """Utility function to visualize a graph with a given title."""
-    
+    pos = nx.spring_layout(graph, seed=9)
+    # positions for all nodes - seed for reproducibility
     nx.draw(
         graph,
-        # pos,
+        pos,
         ax=ax,
         with_labels=True,
         node_size=700,
         node_color=color,
-        font_size=15
+        font_size=15,
     )
+    if weights:
+        edge_labels = nx.get_edge_attributes(graph, "weight")
+        nx.draw_networkx_edge_labels(graph, pos, edge_labels, ax=ax)
     if "degree" in properties:
         degree_distribution = [f"{graph.degree(node):d}" for node in graph.nodes()]
         title += "\nDegree distribution:" + " ".join(degree_distribution)
@@ -101,6 +106,7 @@ def create_graph_comparison(
         colors=['lightblue', 'lightgreen'],
         fig_name="graph_comparison.png",
         properties=["degree"],
+        weights=False,
     ):
     
     fig, axs = plt.subplots(1, len(graph_def), figsize=(len(graph_def)*5, 5))
@@ -115,7 +121,8 @@ def create_graph_comparison(
             graph_x,
             graph_names[index],
             color=colors[index%2],
-            properties=properties
+            properties=properties,
+            weights=weights
         )
     save_graph(
         figure_folder=figure_folder,

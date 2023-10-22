@@ -81,6 +81,7 @@ when choosing the combination of 3 nodes from n nodes.
 
 
 \section{Question 2 : 2 graphs having the same degree distribution $\not \implies$ isomorphic}
+
 If two graphs have the same degree distribution, it does not imply that they are isomorphic to each other.
 The simplest counter-example with degrees of nodes of 2 is presented 
 in \ref{fig:graph_triangle_vs_three_single_loops},
@@ -144,7 +145,6 @@ which is the most pleasant example to visualize.
 \pagebreak
 \part[short]{Graph classification}
 
-
 \subsection*{Task 10 : Cycle and graph dataset creation}
 
 \begin{figure}[ht]
@@ -155,6 +155,32 @@ which is the most pleasant example to visualize.
 \end{figure}
 
 
+\section{Question 6 : Shortest path kernel}
+In \ref{fig:P4_shortest_paths_computation} and \ref{fig:S4_shortest_paths_computation}, we show 
+how we progressively build the shortest paths graph for the path $P_4$ and the start $S_4$.
+Then we simply compute the distribution of the edges weights (=length) to get the so called "feature map" $\phi$.
+We get:
+\begin{itemize}
+    \item $\phi(P_4)=[3, 2, 1, 0 ...]^T$
+    \item $\phi(S_4)=[3, 3, 0, 0 ...]^T$
+    \item $k(P_4, P_4) = 3^2 + 2^2 + 1^2 = 14$
+    \item $k(P_4, S_4) = K(S_4, P_4) = 3*3+2*3+1*0 = 15$
+    \item $k(S_4, S_4) = 3^2 + 3^2 = 18$
+\end{itemize}
+
+\begin{figure}[ht]
+        \centering
+        \includegraphics[width=1.\textwidth]{figures/P4_shortest_paths_computation.png}
+        \caption{Path graph $P_4$, $\phi(P_4)=[3, 2, 1, 0 ...]^T$}
+        \label{fig:P4_shortest_paths_computation}
+\end{figure}
+
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=.6\textwidth]{figures/S4_shortest_paths_computation.png}
+    \caption{Start graph $S_4$ , $\phi(S_4)=[3, 3, 0, 0 ...]^T$}
+    \label{fig:S4_shortest_paths_computation}
+\end{figure}
 
 \pagebreak
 %------------------------------------------------
