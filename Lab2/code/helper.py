@@ -105,8 +105,11 @@ def create_graph_comparison(
     
     fig, axs = plt.subplots(1, len(graph_def), figsize=(len(graph_def)*5, 5))
     for index, graph_x_def in enumerate(graph_def):
-        graph_x = nx.Graph()
-        graph_x.add_edges_from(graph_x_def)
+        if isinstance(graph_x_def, list):
+            graph_x = nx.Graph()
+            graph_x.add_edges_from(graph_x_def)
+        elif isinstance(graph_x_def, nx.Graph):
+            graph_x = graph_x_def
         visualize_graph(
             axs[index],
             graph_x,

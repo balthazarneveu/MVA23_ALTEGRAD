@@ -7,23 +7,43 @@ import numpy as np
 from sklearn.model_selection import train_test_split
 from sklearn.svm import SVC
 from sklearn.metrics import accuracy_score
-
+from typing import List, Tuple
+from helper import create_graph_comparison, task
+from pathlib import Path
+import helper
 
 ############## Task 10
 # Generate simple dataset
-def create_dataset():
-    Gs = list()
-    y = list()
+def create_dataset() -> Tuple[List[nx.Graph], List[int], List[str]]:
+    graph_list = list()
+    graph_list += [nx.cycle_graph(n) for n in range(3, 103)]
+    graph_list += [nx.path_graph(n) for n in range(3, 103)]
+    y = 100*[0] + 100*[1]
+    assert len(y) == len(graph_list)
+    graph_names = [f"Cycle {idx}" for idx in range(3, 103)] + [f"Path {idx}" for idx in range(3, 103)]
+    return graph_list, y, graph_names
 
-    ##################
-    # your code here #
-    ##################
+@task
+def task_10(figure_folder=None):
+    """Cycle and graph dataset creation"""
+    Gs, y, graph_names = create_dataset()
+    np.random.seed(46)
+    random_index = 100*np.random.randint(0, 2, size=6) + np.random.randint(0, 20, size=6)
+    create_graph_comparison(
+        [Gs[idx] for idx in random_index], 
+        graph_names=[graph_names[idx] for idx in random_index], properties=[],
+        figure_folder=figure_folder,
+        fig_name ="cycle_and_paths_dataset.png",
+        legend="Dataset is made of cycles $C_n$ and paths $P_n$"
+    )
 
-    return Gs, y
-
-
-Gs, y = create_dataset()
-G_train, G_test, y_train, y_test = train_test_split(Gs, y, test_size=0.1)
+if __name__ == '__main__':
+    helper.latex_mode = True
+    figures_folder = Path(__file__).parent/".."/"report"/"figures"
+    figures_folder.mkdir(parents=True, exist_ok=True)
+    task_10(figure_folder=figures_folder)
+exit()
+# G_train, G_test, y_train, y_test = train_test_split(Gs, y, test_size=0.1)
 
 # Compute the shortest path kernel
 def shortest_path_kernel(Gs_train, Gs_test):    
