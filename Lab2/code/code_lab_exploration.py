@@ -325,8 +325,8 @@ def question_3(figure_folder=None):
     )
 
 if __name__ == "__main__":
-    dataset_folder = Path(__file__).parent/".."/"datasets"
-    figures_folder = Path(__file__).parent/".."/".."/"report"/"figures"
+    dataset_folder = Path(__file__).parent/"datasets"
+    figures_folder = Path(__file__).parent/".."/"report"/"figures"
     figures_folder.mkdir(parents=True, exist_ok=True)
     edges_file = dataset_folder/"CA-HepTh.txt"
 
