@@ -132,7 +132,9 @@ def compute_graphlet_feature_matrix(
             # We're counting over N samples
         phi_array[u, :] = feature_vector
     return  phi_array
-    
+
+
+############## Task 12
 def graphlet_kernel(
         Gs_train: List[nx.Graph],
         Gs_test: List[nx.Graph],
@@ -167,6 +169,24 @@ def graphlet_kernel(
     K_test = np.dot(phi_test, phi_train.T)
     return K_train, K_test
 
+
+############## Task 13
+def train_eval_classifier(K_train, K_test, y_train, y_test, title=""):
+    clf = SVC(kernel='precomputed')
+    clf.fit(K_train, y_train)
+    y_pred_train = clf.predict(K_train)
+    accuracy_train = accuracy_score(y_train, y_pred_train, normalize=True, sample_weight=None)
+    y_pred = clf.predict(K_test)
+    accuracy = accuracy_score(y_test, y_pred, normalize=True, sample_weight=None)
+    print(f"{title} based kernel, SVM classifier (trained with accuracy={accuracy_train*100.:.2f})%) Test: {accuracy*100.:.2f}%")
+
+@task
+def task_13(K_train_graphlet_kernel, K_test_graphlet_kernel, K_train_sp, K_test_sp, y_train, y_test):
+    """SVM classifier comparison of kernels (graphlet vs shortest path)
+    """
+    train_eval_classifier(K_train_graphlet_kernel, K_test_graphlet_kernel, y_train, y_test, title="Graphlet")
+    train_eval_classifier(K_train_sp, K_test_sp, y_train, y_test, title="Shortest path")
+    
 ###------------------------------------------- VISUALIZATION -----------------------------
 # VISUALIZE A FEW GRAPHS
 @task
@@ -252,12 +272,13 @@ def question_6(figure_folder=None):
         weights=True
     )
 
-
 if __name__ == '__main__':
+    helper.latex_mode = True
     # DATASET INITIALIZATION
     G_train, G_test, y_train, y_test = initialize_dataset()
     K_train_sp, K_test_sp = shortest_path_kernel(G_train, G_test)
     K_train_graphlet_kernel, K_test_graphlet_kernel = graphlet_kernel(G_train, G_test, debug=False)
+    task_13(K_train_graphlet_kernel, K_test_graphlet_kernel, K_train_sp, K_test_sp, y_train, y_test)
     # VISUALIZATION
     extra_visualizations = False
     if extra_visualizations:
@@ -275,18 +296,10 @@ if __name__ == '__main__':
 
 
 
-############## Task 12
-
-##################
-# your code here #
-##################
 
 
 
 
-############## Task 13
 
-##################
-# your code here #
-##################
+
 

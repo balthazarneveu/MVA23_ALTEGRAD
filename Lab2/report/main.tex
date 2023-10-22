@@ -126,7 +126,7 @@ which is the most pleasant example to visualize.
 \end{figure}
 
 \pagebreak
-\subsection*{Question 3 : n-cycle graphs}
+\section{Question 3 : n-cycle graphs}
 \begin{itemize}
     \item Clustering coefficient of the triangle $C_3$ is $1=\frac{1}{1+0}$
     \item Clustering coefficient of cycle graphs $C_n$ where $n \geq 4$ is $0=\frac{0}{0+n}$
@@ -139,9 +139,15 @@ which is the most pleasant example to visualize.
         \label{fig:cycle_graphs}
 \end{figure}
 
+
+
+
 \pagebreak
 \part[short]{Community detection}
-
+\section{Question 4 : Spectral clustering}
+TODO 
+\section{Question 5 : Modularity}
+TODO
 \pagebreak
 \part[short]{Graph classification}
 
@@ -203,6 +209,20 @@ We repeat this sampling process $N=200$ times for each graph.
     \label{fig:finding_isomorphic_graphlets_subgraphs_triangle}
 \end{figure}
 \pagebreak
+
+\subsection*{Task 13 : SVM classifier comparison of kernels (graphlet vs shortest path)}
+\begin{verbatim}
+Graphlet based kernel, SVM classifier (trained with accuracy=50.56%) Test accuracy: 45.00%
+Shortest path based kernel, SVM classifier (trained with accuracy=100.00%) Test accuracy: 85.00%
+\end{verbatim}
+
+Shortest path kernel based classifier is perfectly accurate on this dataset. Graphlet accuracy is much lower.
+This is explained by the fact that when we use Graphlet feature, the discriminative triplets choice
+involve choosing the endpoints of the Path $P_n$ which makes a difference with cycle graphs.
+
+
+\section{Question 7 : Shortest path kernel}
+TODO
 %------------------------------------------------
 
 \bibliographystyle{plain}
