@@ -11,6 +11,7 @@ from typing import List, Tuple
 from helper import create_graph_comparison, task
 from pathlib import Path
 import helper
+from tqdm import tqdm
 
 ############## Task 10
 # Generate simple dataset
@@ -89,41 +90,81 @@ def shortest_path_kernel(Gs_train, Gs_test):
 
 ############## Task 11
 # Compute the graphlet kernel
-def graphlet_kernel(Gs_train, Gs_test, n_samples=200):
+
+def compute_graphlet_feature_matrix(
+    graphs: List[nx.Graph],
+    graphlets: List[nx.Graph],
+    N: int=200,
+    debug=True
+)-> np.ndarray:
+    """Compute graphlet feature maps
+
+    Pseudocode:
+    For each graph G in the G_train_set
+        s_nodes = Sample randomly n_samples * 3 nodes
+        For each triplet_node of set of sample nodes s_nodes
+            For each the i/4 graphlets (of size 3) combinations
+                graphlet_feature[i] = test isomorphism(triplet_node, graphlets[i])
+    """
+    M=len(graphlets) # M=4 when k=3  (M=11 when k=4)
+    phi_array = np.zeros((len(graphs), 4))
+    for u in tqdm(range(len(graphs))):
+        graph = graphs[u]
+        nodes = graph.nodes()
+        feature_vector = np.zeros(M) # [N, M] (200, 4)
+        for s_index in range(N):
+            s_nodes = np.random.choice(nodes, size=3, replace=False)
+            sampled_triplet_subgraph = nx.subgraph(graph, s_nodes)
+            similarity_vector = np.array([
+                    1*nx.is_isomorphic(sampled_triplet_subgraph, graphlet) for graphlet in graphlets
+            ]) # [M]
+            if debug:
+                isomorphic_index = int(np.where(similarity_vector==1)[0])
+                create_graph_comparison(
+                    [sampled_triplet_subgraph] + [graphlets[isomorphic_index]],
+                    graph_names=[f"ref={s_nodes}"] + [f"Graphlet {isomorphic_index} is isomorphic\n {similarity_vector[isomorphic_index]=}"],
+                    properties=[],
+                    # figure_folder=figure_folder,
+                    # fig_name ="cycle_and_paths_dataset.png",
+                    # legend="Dataset is made of cycles $C_n$ and paths $P_n$"
+                )
+            feature_vector+= similarity_vector
+            # We're counting over N samples
+        phi_array[u, :] = feature_vector
+    return  phi_array
+    
+def graphlet_kernel(
+        Gs_train: List[nx.Graph],
+        Gs_test: List[nx.Graph],
+        n_samples=200,
+        debug=False,
+):
     graphlets = [nx.Graph(), nx.Graph(), nx.Graph(), nx.Graph()]
     
-    graphlets[0].add_nodes_from(range(3))
+    
+    graphlets[0].add_nodes_from(range(3)) 
+    # 3 disjoint nodes (G4 in Figure 4)
 
     graphlets[1].add_nodes_from(range(3))
     graphlets[1].add_edge(0,1)
+    # (G3 in Figure 4)
 
     graphlets[2].add_nodes_from(range(3))
     graphlets[2].add_edge(0,1)
-    graphlets[2].add_edge(1,2)
+    graphlets[2].add_edge(1,2) 
+    # (G2 in Figure 4)
 
     graphlets[3].add_nodes_from(range(3))
     graphlets[3].add_edge(0,1)
     graphlets[3].add_edge(1,2)
     graphlets[3].add_edge(0,2)
+    # (G1 in Figure 4)
 
-    
-    phi_train = np.zeros((len(G_train), 4))
-    
-    ##################
-    # your code here #
-    ##################
-
-
-    phi_test = np.zeros((len(G_test), 4))
-    
-    ##################
-    # your code here #
-    ##################
-
-
+    phi_train = compute_graphlet_feature_matrix(Gs_train, graphlets=graphlets, N=n_samples, debug=debug)
+    phi_test = compute_graphlet_feature_matrix(Gs_test, graphlets=graphlets, N=n_samples,  debug=debug)
+    assert (phi_train.sum(axis=1) == n_samples).all()
     K_train = np.dot(phi_train, phi_train.T)
     K_test = np.dot(phi_test, phi_train.T)
-
     return K_train, K_test
 
 ###------------------------------------------- VISUALIZATION -----------------------------
@@ -216,9 +257,9 @@ if __name__ == '__main__':
     # DATASET INITIALIZATION
     G_train, G_test, y_train, y_test = initialize_dataset()
     K_train_sp, K_test_sp = shortest_path_kernel(G_train, G_test)
-
+    K_train_graphlet_kernel, K_test_graphlet_kernel = graphlet_kernel(G_train, G_test, debug=False)
     # VISUALIZATION
-    extra_visualizations = True
+    extra_visualizations = False
     if extra_visualizations:
         helper.latex_mode = True
         figures_folder = Path(__file__).parent/".."/"report"/"figures"
