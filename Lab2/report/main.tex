@@ -183,6 +183,26 @@ We get:
 \end{figure}
 
 \pagebreak
+\section*{Task 11: Finding isomorphic graphlets in subgraphs}
+We show in \ref{fig:finding_isomorphic_graphlets_subgraphs} and \ref{fig:finding_isomorphic_graphlets_subgraphs_triangle}
+how to compute the feature maps for each sampled triplet subgraph.
+We repeat this sampling process $N=200$ times for each graph.
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=.6\textwidth]{figures/finding_isomorphic_graphlets_subgraphs.png}
+    \caption{Finding graphlet "$G_1$" (notation of the code) which is isomorphic with a randomly sampled subgraph made of 3 nodes.
+    Feature vector is $[0, 1, 0, 0]^T$ for this subgraph}
+    \label{fig:finding_isomorphic_graphlets_subgraphs}
+\end{figure}
+
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=.6\textwidth]{figures/finding_isomorphic_graphlets_subgraphs_triangle.png}
+    \caption{Finding triangle graphlet "$G_3$" ( notation of the code) which is isomorphic with a randomly sampled subgraph made of 3 nodes?
+    Feature vector is $[0, 0, 0, 1]^T$ for this subgraph}
+    \label{fig:finding_isomorphic_graphlets_subgraphs_triangle}
+\end{figure}
+\pagebreak
 %------------------------------------------------
 
 \bibliographystyle{plain}
