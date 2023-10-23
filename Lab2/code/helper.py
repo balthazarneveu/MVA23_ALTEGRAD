@@ -80,10 +80,22 @@ def visualize_graph(
         title,
         color='lightgreen',
         properties=["degree"],
+        node_labels=None,
         weights=False):
     """Utility function to visualize a graph with a given title."""
     pos = nx.spring_layout(graph, seed=9)
     # positions for all nodes - seed for reproducibility
+    if node_labels is not None:
+        color_map = [
+            "red",
+            "green",
+            "blue",
+            "purple",
+            "lightgreen",
+            "lightblue",
+            
+        ]
+        color = [color_map[node_labels[node]%len(color_map)] for node in graph.nodes()]
     nx.draw(
         graph,
         pos,
@@ -91,8 +103,11 @@ def visualize_graph(
         with_labels=True,
         node_size=700,
         node_color=color,
+        
         font_size=15,
     )
+    
+
     if weights:
         edge_labels = nx.get_edge_attributes(graph, "weight")
         nx.draw_networkx_edge_labels(graph, pos, edge_labels, ax=ax)
@@ -105,7 +120,7 @@ def visualize_graph(
     ax.set_title(title)
 
 def create_graph_comparison(
-        graph_def = [
+        graph_def: list = [
             [('a', 'b'), ('b', 'c'), ('c', 'd'), ('d', 'a')],
             [('w', 'x'), ('x', 'y'), ('y', 'w'), ('z', 'z')]
         ],
@@ -115,6 +130,7 @@ def create_graph_comparison(
         colors=['lightblue', 'lightgreen'],
         fig_name="graph_comparison.png",
         properties=["degree"],
+        node_labels:list=None,
         weights=False,
     ):
     
@@ -126,12 +142,13 @@ def create_graph_comparison(
         elif isinstance(graph_x_def, nx.Graph):
             graph_x = graph_x_def
         visualize_graph(
-            axs[index],
+            axs[index] if len(graph_def)>1 else axs,
             graph_x,
             graph_names[index],
             color=colors[index%2],
             properties=properties,
-            weights=weights
+            weights=weights,
+            node_labels=None if node_labels is None else node_labels[index]
         )
     save_graph(
         figure_folder=figure_folder,
