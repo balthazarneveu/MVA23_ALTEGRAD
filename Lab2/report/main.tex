@@ -143,7 +143,77 @@ which is the most pleasant example to visualize.
 
 
 \pagebreak
+
 \part[short]{Community detection}
+
+\subsection*{Task 6 : Toy example for spectral graph clustering}
+
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=.6\textwidth]{figures/spectral_clustering_toy_example.png}
+    \caption{G =union of 3 disjoint subgraphs (complete, cycle, star). Spectral graph clustering, k=3 clusters found correctly}
+    \label{fig:spectral_clustering_toy_example}
+\end{figure}
+
+\begin{verbatim}
+    ADJACENCY MATRIX:
+    [[0 1 1 0 0 0 0 0 0 0 0 0 0]
+     [1 0 1 0 0 0 0 0 0 0 0 0 0]
+     [1 1 0 0 0 0 0 0 0 0 0 0 0]
+     [0 0 0 0 1 0 1 0 0 0 0 0 0]
+     [0 0 0 1 0 1 0 0 0 0 0 0 0]
+     [0 0 0 0 1 0 1 0 0 0 0 0 0]
+     [0 0 0 1 0 1 0 0 0 0 0 0 0]
+     [0 0 0 0 0 0 0 0 1 1 1 1 1]
+     [0 0 0 0 0 0 0 1 0 0 0 0 0]
+     [0 0 0 0 0 0 0 1 0 0 0 0 0]
+     [0 0 0 0 0 0 0 1 0 0 0 0 0]
+     [0 0 0 0 0 0 0 1 0 0 0 0 0]
+     [0 0 0 0 0 0 0 1 0 0 0 0 0]]
+\end{verbatim}
+
+
+\pagebreak
+\begin{verbatim}
+    LAPLACIAN:
+    [[ 1.  -0.5 -0.5  0.   0.   0.   0.   0.   0.   0.   0.   0.   0. ]
+     [-0.5  1.  -0.5  0.   0.   0.   0.   0.   0.   0.   0.   0.   0. ]
+     [-0.5 -0.5  1.   0.   0.   0.   0.   0.   0.   0.   0.   0.   0. ]
+     [ 0.   0.   0.   1.  -0.5  0.  -0.5  0.   0.   0.   0.   0.   0. ]
+     [ 0.   0.   0.  -0.5  1.  -0.5  0.   0.   0.   0.   0.   0.   0. ]
+     [ 0.   0.   0.   0.  -0.5  1.  -0.5  0.   0.   0.   0.   0.   0. ]
+     [ 0.   0.   0.  -0.5  0.  -0.5  1.   0.   0.   0.   0.   0.   0. ]
+     [ 0.   0.   0.   0.   0.   0.   0.   1.  -0.2 -0.2 -0.2 -0.2 -0.2]
+     [ 0.   0.   0.   0.   0.   0.   0.  -1.   1.   0.   0.   0.   0. ]
+     [ 0.   0.   0.   0.   0.   0.   0.  -1.   0.   1.   0.   0.   0. ]
+     [ 0.   0.   0.   0.   0.   0.   0.  -1.   0.   0.   1.   0.   0. ]
+     [ 0.   0.   0.   0.   0.   0.   0.  -1.   0.   0.   0.   1.   0. ]
+     [ 0.   0.   0.   0.   0.   0.   0.  -1.   0.   0.   0.   0.   1. ]]
+\end{verbatim}
+We clearly observe the 3 blocks on the diagonal. When we perform the eigen decomposition
+and keep the $d=3$ eigen vectors associated with the 3 lowest eigen values (0, 0, 0). 
+
+$eigen values = [0, 0, 0, 1 , 1, 1, 1, 1, 1, 1.5, 1.5, 2, 2]$. 
+The first 3 zeros correspond to the 3 disjoint subgraphs.
+
+
+\begin{verbatim}
+    MATRIX OF EIGEN VECTORS ASSOCIATED WITH THE THREE LOWEST EIGEN VALUES
+    [[ 0.          0.         -0.57735027]
+     [ 0.          0.         -0.57735027]
+     [ 0.          0.         -0.57735027]
+     [ 0.5         0.          0.        ]
+     [ 0.5         0.          0.        ]
+     [ 0.5         0.          0.        ]
+     [ 0.5         0.          0.        ]
+     [ 0.         -0.40824829  0.        ]
+     [ 0.         -0.40824829  0.        ]
+     [ 0.         -0.40824829  0.        ]
+     [ 0.         -0.40824829  0.        ]
+     [ 0.         -0.40824829  0.        ]
+     [ 0.         -0.40824829  0.        ]]     
+\end{verbatim}
+
 \section{Question 4 : Spectral clustering}
 TODO 
 \section{Question 5 : Modularity}
