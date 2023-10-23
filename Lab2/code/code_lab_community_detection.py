@@ -14,7 +14,6 @@ import helper
 from code_lab_exploration import extract_giant_component
 
 
-
 ############## Task 6
 def compute_laplacian(graph: nx.Graph, sparse=False, debug_prints=False) -> np.ndarray:
     node_list = graph.nodes()
@@ -78,7 +77,49 @@ def spectral_clustering(graph:  nx.Graph, k:int, d=None, sparse=True, debug_prin
     return clustering
 
 
+############## Task 7
+def task_7(graph: nx.Graph, k:int = 50) -> dict:
+    """Spectral clustering of the giant component of the CA-HepTh graph
+    Apply the Spectral Clustering algorithm
+    to the giant connected component of the CA-HepTh
+    dataset, trying to identify k=50 clusters.
+    """
+    clusters = spectral_clustering(graph, k, sparse=True)
+    from collections import Counter
+    cluster_counts = Counter(clusters.values())
+    print(cluster_counts)
+    return clusters
+    
 
+############## Task 8
+def modularity(graph: nx.Graph, clustering: dict):
+    """Compute modularity value from graph G based on clustering"""
+    m = len(graph.edges)
+    nc = len(set(clustering.values()))
+    modularity = 0
+    for cluster_label in range(nc):
+        community_nodes = [node for node, label in clustering.items() if label==cluster_label]
+        community_graph = nx.subgraph(graph, community_nodes)
+        lc = len(community_graph.edges) # number of edges withing the community.
+        dc = np.array([degree for _node, degree in nx.degree(graph, community_nodes)]).sum()
+        modularity+= lc/m - (dc/(2*m))**2
+    return modularity
+
+############## Task 9
+@task
+def task_9(graph: nx.Graph, clustering:dict, k=50):
+    """Modularity computation of the giant connected component of the CA-HepTh dataset."""
+    modularity_spectral_clustering = modularity(graph, clustering)
+    print(f"Modularity of the spectral k=50 clustering {modularity_spectral_clustering:.3f}")
+    random_clustering = {}
+    for node in graph.nodes:
+        random_clustering[node] = randint(0, k-1)
+    modularity_random = modularity(graph, random_clustering)
+    print(f"Modularity of the random graph partition {modularity_random:.3f}")
+
+
+##### EXTRA 
+# TASK 6 : TOY EXAMPLE VALIDATION
 @task
 def task_6(figure_folder=None):
     """Toy example on 3 disjoint subgraphs (complete, cycle, star). k=3 clusters found"""
@@ -117,48 +158,6 @@ def task_6(figure_folder=None):
     # spectral_clustering(nx.star_graph(3), 2, sparse=False, debug_prints=True)
     # spectral_clustering(nx.star_graph(3), 2, sparse=False, debug_prints=True)
 
-
-
-
-############## Task 7
-def task_7(graph: nx.Graph, k:int = 50) -> dict:
-    """Spectral clustering of the giant component of the CA-HepTh graph
-    Apply the Spectral Clustering algorithm
-    to the giant connected component of the CA-HepTh
-    dataset, trying to identify k=50 clusters.
-    """
-    clusters = spectral_clustering(graph, k, sparse=True)
-    from collections import Counter
-    cluster_counts = Counter(clusters.values())
-    print(cluster_counts)
-    return clusters
-    
-
-############## Task 8
-def modularity(graph: nx.Graph, clustering: dict):
-    """Compute modularity value from graph G based on clustering"""
-    m = len(graph.edges)
-    nc = len(set(clustering.values()))
-    modularity = 0
-    for cluster_label in range(nc):
-        community_nodes = [node for node, label in clustering.items() if label==cluster_label]
-        community_graph = nx.subgraph(graph, community_nodes)
-        lc = len(community_graph.edges) # number of edges withing the community.
-        dc = np.array([degree for _node, degree in nx.degree(graph, community_nodes)]).sum()
-        modularity+= lc/m - (dc/(2*m))**2
-    return modularity
-
-############## Task 9
-@task
-def task_9(graph: nx.Graph, clustering:dict, k=50):
-    """Modularity computation of the giant connected component of the CA-HepTh dataset."""
-    modularity(graph, clustering)
-    random_clustering = {}
-    for node in graph.nodes:
-        random_clustering[node] = randint(0, k-1)
-    modularity(graph, random_clustering)
-
-
 # Question 5: numerical validation
 @task
 def question_5(figure_folder:Path=None):
@@ -182,31 +181,18 @@ def question_5(figure_folder:Path=None):
         figure_folder=figure_folder
     )
 if __name__ == '__main__':
-    helper.latex_mode = True
+    extra=False
+
+    if extra:
+        helper.latex_mode = True
+        figures_folder = Path(__file__).parent/".."/"report"/"figures"
+        figures_folder.mkdir(parents=True, exist_ok=True)
+        task_6(figure_folder=figures_folder)
+        question_5(figure_folder=figures_folder)
+    
     dataset_folder = Path(__file__).parent/"datasets"
-    figures_folder = Path(__file__).parent/".."/"report"/"figures"
-    question_5(figure_folder=figures_folder)
-    figures_folder.mkdir(parents=True, exist_ok=True)
-    task_6(figure_folder=figures_folder)
     edges_file = dataset_folder/"CA-HepTh.txt"
     graph = load_graph(edges_file)
     giant_component = extract_giant_component(graph)
     cluster_dict = task_7(graph)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+    task_9(giant_component, cluster_dict)
