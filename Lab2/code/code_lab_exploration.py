@@ -8,18 +8,11 @@ import numpy as np
 from pathlib import Path
 import pprint
 from typing import Optional
-from helper import task, create_graph_comparison, save_graph
+from helper import task, create_graph_comparison, save_graph, load_graph
 import helper
 
-
 ############## Task 1
-def load_graph(edge_path: Path) -> nx.Graph:
-    """
-    Load the network data into an undirected graph G
-    using the read edgelist() function of NetworkX.
-    """
-    graph = nx.read_edgelist(edges_file)
-    return graph
+
 
 def get_stats(graph: nx.Graph):
     stats = {

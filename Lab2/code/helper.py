@@ -12,6 +12,15 @@ from typing import Callable, Optional
 import functools
 latex_mode = False
 
+
+def load_graph(edge_path: Path) -> nx.Graph:
+    """
+    Load the network data into an undirected graph G
+    using the read edgelist() function of NetworkX.
+    """
+    graph = nx.read_edgelist(edge_path)
+    return graph
+
 # ______________________________________________________________________________
 # REPORT HELPERS
 # ______________________________________________________________________________
