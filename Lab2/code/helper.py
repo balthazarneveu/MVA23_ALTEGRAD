@@ -81,9 +81,10 @@ def visualize_graph(
         color='lightgreen',
         properties=["degree"],
         node_labels=None,
-        weights=False):
+        weights=False,
+        seed=9):
     """Utility function to visualize a graph with a given title."""
-    pos = nx.spring_layout(graph, seed=9)
+    pos = nx.spring_layout(graph, seed=seed)
     # positions for all nodes - seed for reproducibility
     if node_labels is not None:
         color_map = [
@@ -132,6 +133,7 @@ def create_graph_comparison(
         properties=["degree"],
         node_labels:list=None,
         weights=False,
+        seed=9
     ):
     
     fig, axs = plt.subplots(1, len(graph_def), figsize=(len(graph_def)*5, 5))
@@ -148,7 +150,8 @@ def create_graph_comparison(
             color=colors[index%2],
             properties=properties,
             weights=weights,
-            node_labels=None if node_labels is None else node_labels[index]
+            node_labels=None if node_labels is None else node_labels[index],
+            seed=seed
         )
     save_graph(
         figure_folder=figure_folder,

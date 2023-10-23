@@ -38,6 +38,16 @@ def task_1(graph: nx.Graph) -> dict:
 
 
 ############## Task 2
+def extract_giant_component(graph: nx.Graph, stats={}):
+    connected_components_list = sorted(nx.connected_components(graph), key=len, reverse=True)
+    # sort on the length of components, first element is the largest
+    number_of_connected_components = len(connected_components_list)
+    stats["total_connected_components"] = number_of_connected_components
+    if number_of_connected_components>1:
+        print(f"Graph has {number_of_connected_components} connected components")
+    giant_connected_component = graph.subgraph(connected_components_list[0])
+    return giant_connected_component
+
 @task
 def task_2(graph: nx.Graph, stats=None):
     """Extract the connected components of the graph
@@ -49,13 +59,7 @@ def task_2(graph: nx.Graph, stats=None):
     """
     if stats is None:
         stats = get_stats(graph)
-    connected_components_list = sorted(nx.connected_components(graph), key=len, reverse=True)
-    # sort on the length of components, first element is the largest
-    number_of_connected_components = len(connected_components_list)
-    stats["total_connected_components"] = number_of_connected_components
-    if number_of_connected_components>1:
-        print(f"Graph has {number_of_connected_components} connected components")
-    giant_connected_component = graph.subgraph(connected_components_list[0])
+    giant_connected_component = extract_giant_component(graph, stats=stats)
     stats_giant_component = get_stats(giant_connected_component)
     print("Largest connected component:")
     pprint.pprint(stats_giant_component, width=10)
@@ -63,7 +67,7 @@ def task_2(graph: nx.Graph, stats=None):
         print(f"{stats_giant_component[key]} {key}" +
               f" represent {stats_giant_component[key]/stats[key]*100:.2f}%" +
               " of the graph")
-
+    return giant_connected_component
 ############## Task 3
 def stats_array(sequence:np.ndarray, stat: dict={}, title="degree_of_nodes"):
     stat[title] = {}

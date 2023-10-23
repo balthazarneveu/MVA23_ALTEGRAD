@@ -10,7 +10,8 @@ from random import randint
 from sklearn.cluster import KMeans
 from helper import create_graph_comparison, task, load_graph
 from pathlib import Path
-
+import helper
+from code_lab_exploration import extract_giant_component
 
 
 
@@ -58,7 +59,7 @@ def spectral_clustering(graph:  nx.Graph, k:int, d=None, sparse=True, debug_prin
     else:
         sorted_eigen_values, eigen_vectors = eigs(
             laplacian,
-            which="SR", # SM for smallest real part
+            which="SR", # SR for smallest real part
             k=k
         )
         sorted_eigen_values = sorted_eigen_values.real
@@ -76,14 +77,13 @@ def spectral_clustering(graph:  nx.Graph, k:int, d=None, sparse=True, debug_prin
         clustering[node_list[idx]] = cluster_index
     return clustering
 
-def task_7(graph: nx.Graph):
-    spectral_clustering(graph, 5, sparse=True)
-    
 
 
-def task_6():
-    n1 = 4
-    n2 = 6
+@task
+def task_6(figure_folder=None):
+    """Toy example on 3 disjoint subgraphs (complete, cycle, star). k=3 clusters found"""
+    n1 = 3
+    n2 = 4
     n_star = 6
     G1 = nx.complete_graph(n1)
     G2 = nx.cycle_graph(n2)
@@ -102,62 +102,107 @@ def task_6():
         [G],
         node_labels=[nodel_labels],
         properties=[],
+        figure_folder=figure_folder,
+        fig_name="spectral_clustering_toy_example.png",
         legend="Spectral graph clustering on a toy example",
-        graph_names=["Spectral graph clustering on a toy example"]
+        graph_names=["Spectral graph clustering on a toy example"],
+        seed=42
     )
-    
-    # nodel_labels_ = spectral_clustering(G_shuffled, 2, d=2, sparse=False, debug_prints=True)
-    # create_graph_comparison([G_shuffled], node_labels=[nodel_labels_])
 
-if __name__ == '__main__':
-    task_6()
-    dataset_folder = Path(__file__).parent/"datasets"
-    figures_folder = Path(__file__).parent/".."/"report"/"figures"
-    figures_folder.mkdir(parents=True, exist_ok=True)
-    edges_file = dataset_folder/"CA-HepTh.txt"
-    graph = load_graph(edges_file)     
-    task_7(graph)
-    # task_6(nx.star_graph(20))
-    # eigen_values = 
-    # On a star graph
+    # Sanity check on a star graph
     # - 0 = multiplicity 1
     # - 1 = multiplicity n-2 
     # - 2 = multiplicity 1
     # S4, n=4
-    spectral_clustering(nx.star_graph(3), 2, sparse=False, debug_prints=True)
-    spectral_clustering(nx.star_graph(3), 2, sparse=False, debug_prints=True)
+    # spectral_clustering(nx.star_graph(3), 2, sparse=False, debug_prints=True)
+    # spectral_clustering(nx.star_graph(3), 2, sparse=False, debug_prints=True)
+
+
+
+
 ############## Task 7
-
-##################
-# your code here #
-##################
-
-
-
-
-
-
+def task_7(graph: nx.Graph, k:int = 50) -> dict:
+    """Spectral clustering of the giant component of the CA-HepTh graph
+    Apply the Spectral Clustering algorithm
+    to the giant connected component of the CA-HepTh
+    dataset, trying to identify k=50 clusters.
+    """
+    clusters = spectral_clustering(graph, k, sparse=True)
+    from collections import Counter
+    cluster_counts = Counter(clusters.values())
+    print(cluster_counts)
+    return clusters
+    
 
 ############## Task 8
-# Compute modularity value from graph G based on clustering
-def modularity(G, clustering):
-    
-    ##################
-    # your code here #
-    ##################
-    
-
-    
-    
+def modularity(graph: nx.Graph, clustering: dict):
+    """Compute modularity value from graph G based on clustering"""
+    m = len(graph.edges)
+    nc = len(set(clustering.values()))
+    modularity = 0
+    for cluster_label in range(nc):
+        community_nodes = [node for node, label in clustering.items() if label==cluster_label]
+        community_graph = nx.subgraph(graph, community_nodes)
+        lc = len(community_graph.edges) # number of edges withing the community.
+        dc = np.array([degree for _node, degree in nx.degree(graph, community_nodes)]).sum()
+        modularity+= lc/m - (dc/(2*m))**2
     return modularity
 
-
-
 ############## Task 9
+@task
+def task_9(graph: nx.Graph, clustering:dict, k=50):
+    """Modularity computation of the giant connected component of the CA-HepTh dataset."""
+    modularity(graph, clustering)
+    random_clustering = {}
+    for node in graph.nodes:
+        random_clustering[node] = randint(0, k-1)
+    modularity(graph, random_clustering)
 
-##################
-# your code here #
-##################
+
+# Question 5: numerical validation
+@task
+def question_5(figure_folder:Path=None):
+    """Modularity computation"""
+    gr1 = nx.complete_graph(range(1, 5))
+    gr2 = nx.complete_graph(range(5, 9))
+    gr = nx.union(gr1, gr2)
+    gr.add_edge(3, 5)
+    gr.add_edge(4, 6)
+    cluster_left = {1: 0, 2: 0, 3:0, 4:0, 5:1, 6:1, 7:1, 8:1}
+    cluster_right= {1: 0, 2: 0, 3:1, 4:0, 5:1, 6:0, 7:1, 8:0}
+    mod_left = modularity(gr, cluster_left)
+    mod_right= modularity(gr, cluster_right)
+    create_graph_comparison(
+        [gr, gr],
+        node_labels=[cluster_left, cluster_right, cluster_left],
+        legend=f'modularity comparison (computation using the python implementation)',
+        properties=[],
+        graph_names=[f"left Q={mod_left:.3f}", f"right Q={mod_right:.3f}"],
+        fig_name="modularity_computation.png",
+        figure_folder=figure_folder
+    )
+if __name__ == '__main__':
+    helper.latex_mode = True
+    dataset_folder = Path(__file__).parent/"datasets"
+    figures_folder = Path(__file__).parent/".."/"report"/"figures"
+    question_5(figure_folder=figures_folder)
+    figures_folder.mkdir(parents=True, exist_ok=True)
+    task_6(figure_folder=figures_folder)
+    edges_file = dataset_folder/"CA-HepTh.txt"
+    graph = load_graph(edges_file)
+    giant_component = extract_giant_component(graph)
+    cluster_dict = task_7(graph)
+
+
+
+
+
+
+
+
+
+
+
 
 
 
