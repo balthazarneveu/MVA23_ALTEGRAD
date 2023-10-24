@@ -273,7 +273,7 @@ def question_6(figure_folder=None):
     )
 
 if __name__ == '__main__':
-    helper.latex_mode = True
+    # helper.latex_mode = True
     # DATASET INITIALIZATION
     G_train, G_test, y_train, y_test = initialize_dataset()
     K_train_sp, K_test_sp = shortest_path_kernel(G_train, G_test)
