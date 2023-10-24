@@ -215,11 +215,42 @@ The first 3 zeros correspond to the 3 disjoint subgraphs.
 \end{verbatim}
 
 \section{Question 4 : Spectral clustering}
-$L^{RW}*u_1 = 0 \implies u_1 = D^{-1}A*u_1$
+From the trials on the code, I see that the lowest eigen value is equal to zero (see the numerical example from previous section).
+I don't know how to prove the property shown for the symmetric $L$ Laplacian matrix from the class (slide 69 on community detection class) on the $L^{RW}$ matrix.
 
+I will assume this result.
+$L^{RW}*u_1 = 0 \implies u_1 = D^{-1}A*u_1 \implies D*u_1 = A*u_1$
 
-$\sum_{i=1}^{n}\sum_{j=1}^{n}A_{ij}([u_1]_i - [u_1]_j)^2$
-TODO!
+\begin{equation}
+\sum_{i=1}^{n}\sum_{j=1}^{n}A_{ij}([u_1]_i - [u_1]_j)^2 = 
+\sum_{i=1}^{n}\sum_{j=1}^{n}A_{ij}*[u_1]_i^2 +
+\sum_{i=1}^{n}\sum_{j=1}^{n}A_{ij}*[u_1]_j^2 -2*
+\sum_{i=1}^{n}\sum_{j=1}^{n}[u_1]_i[u_1]_j
+\end{equation}
+By identifying a quadratic form.
+
+\begin{equation}
+\sum_{i=1}^{n}\sum_{j=1}^{n}[u_1]_i[u_1]_j = u_1^T.A.u_1
+\end{equation}
+And using the property that the row and columns of the adjacency matrix A sum to the diagonal elements of D.
+\begin{itemize}
+    \item $\sum_{i=1}^{n}\sum_{j=1}^{n}A_{ij}*[u_1]_i^2 = \sum_{i=1}^{n}([u_1]_i^2\sum_{j=1}^{n}A_{ij})=\sum_{i=1}^{n}[u_1]_i^2*D_{i,i}=u_1^TDu_1$
+    \item $\sum_{i=1}^{n}\sum_{j=1}^{n}A_{ij}*[u_1]_j^2 = \sum_{j=1}^{n}([u_1]_j^2\sum_{i=1}^{n}A_{ij})=u_1^TDu_1$
+\end{itemize}
+We get 
+\begin{equation}
+    \sum_{i=1}^{n}\sum_{j=1}^{n}A_{ij}([u_1]_i - [u_1]_j)^2= 2.*(u_1^T.(D-A).u_1) = 0
+\end{equation}
+According to the "assumption" on the null eigen value associated with $u_1$, we have $(D-A).u_1 = 0$, therfore the expression is equal to zero.
+
+\section*{Task 9}
+\begin{verbatim}
+---------------------------------------- task_9 ----------------------------------------
+Modularity computation of the giant connected component of the CA-HepTh dataset.
+________________________________________________________________________________________
+Modularity of the spectral k=50 clustering 0.037
+Modularity of the random graph partition -0.000
+\end{verbatim}
 
 \section{Question 5 : Modularity}
 \subsection*{Left graph}
@@ -255,6 +286,8 @@ We get the same numerical results indeed.
     \caption{modularity comparison (computation using the python implementation)}
     \label{fig:modularity_computation}
 \end{figure}
+
+
 
 \pagebreak
 \part[short]{Graph classification}
@@ -329,10 +362,24 @@ This is explained by the fact that when we use Graphlet feature, the discriminat
 involve choosing the endpoints of the Path $P_n$ which makes a difference with cycle graphs.
 
 
-\section{Question 7 : Shortest path kernel}
-TODO
+\section{Question 7 : "Orthogonal graphs" with the graphlet kernel}
+If $G$ and $G'$ verify $k(G,G')=0$, it means that they do not share the same graphlet types.
+We can have $f_G = [m, n, k, 0]^T$ and $f_{G'} = [0, 0, 0, p]$ for instance, $G$ contains m * $G_1$, n*$G_2$, k*$G_3$.
+$G'$ only contains p*$G_4$ graphlets for instance.
+
+A trivial example is for instance constructed with
+\begin{itemize}
+    \item $G=G_1$ and $G'=G_4$. 
+    \item $k(G,G')=[1, 0, 0, 0]*[0, 0, 0, 1]^T = 0$
+\end{itemize}
+A more elegant example involing 4 nodes.
+\begin{itemize}
+    \item Path $G=P_4$ has a graphlet feature vector $f_G=[0, 2, 2, 0]^T$ (graphlets 2*$G_2$ and 2*$G_3$)
+    \item Dense graph $G'$ with 4 nodes is only made of $G_1$ graphlets, it has a  $f_{G'}=[4, 0, 0, 0]^T$.
+    \item Inner product $k(G, G') = f_{g'}^T.f_G = 0$ 
+\end{itemize}
 %------------------------------------------------
 
-\bibliographystyle{plain}
-\bibliography{references}
+% \bibliographystyle{plain}
+% \bibliography{references}
 \end{document}
