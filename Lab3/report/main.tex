@@ -90,6 +90,45 @@ to perform the downstream task training.}
     Comment montrer que je suis autonome . <eos>
 \end{verbatim}
 
+Training logs. Seems like everything is going fine.
+On a Nvidia T500, there is a memory limitation, we have to limit the sentence length to avoid out of memory issues.
+
+
+\begin{itemize}
+    \item $batch_{size} = 16$
+    \item $max_{len} = 64$
+\end{itemize}
+
+\begin{verbatim}
+    | epoch   1 |   500/ 3125 steps | loss 7.29929 | ppl 1479.254
+    | epoch   1 |  1000/ 3125 steps | loss 6.47710 | ppl  650.081
+    | epoch   1 |  1500/ 3125 steps | loss 6.19202 | ppl  488.834
+    | epoch   1 |  2000/ 3125 steps | loss 6.05407 | ppl  425.842
+    | epoch   1 |  2500/ 3125 steps | loss 5.93240 | ppl  377.057
+    | epoch   1 |  3000/ 3125 steps | loss 5.82976 | ppl  340.279
+    | epoch   2 |   500/ 3125 steps | loss 5.50992 | ppl  247.131
+    | epoch   2 |  1000/ 3125 steps | loss 5.46325 | ppl  235.864
+    | epoch   2 |  1500/ 3125 steps | loss 5.42948 | ppl  228.032
+    | epoch   2 |  2000/ 3125 steps | loss 5.40475 | ppl  222.461
+    | epoch   2 |  2500/ 3125 steps | loss 5.37446 | ppl  215.824
+    | epoch   2 |  3000/ 3125 steps | loss 5.35723 | ppl  212.136
+\end{verbatim}
+
+
+
+Here are the prediction results compared to the provided pretrained model.
+
+\begin{verbatim}
+Epoch 2:
+--------
+Bonjour les plus tard, il a été mis à la fin de la région de la Commission,
+mais aussi de la loi de la région de la Commission
+
+Pretrained model:
+-----------------
+Bonjour les gens qui ont été très accueillants et sympathiques.
+\end{verbatim}
+
 
 \section{Question 4: Results interpretation}
 
