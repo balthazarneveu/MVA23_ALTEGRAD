@@ -7,9 +7,81 @@
 \begin{document}
 
 \input{style/header.tex}
+Assume a sequence of $L$ words (and a batch size fof $N=1$ for simplified understanding).
+\section{Question 1: Role of attention and positional encoding}
+\subsection*{Attention square mask}
+The square mask has 2 purposes:
+\begin{itemize}
+\item \textbf{Causality of the prediction}: The mask serves to mask the future tokens. So the current predicted word cannot see what's coming next.
+defined as a square matrix.
+\item \textbf{Performances} Save some computation time during training
+    \begin{itemize} 
+        \item The attention scores are not computed for one word at a time. We directly let the whole sequence vector attend to the whole sequence vector, resulting
+    in a $(L, L)$ attention score matrix.
+        \item \textit{Note: otherwise you'd have to loop $L$ times for all the words, assume you're treating  word $l$, you have to compute an attention vector of size $l$ to the previous word.
+        But tensor operations are not friendly with varying shapes. So better do a bit of extra attention computation and be able to process a whole sequence at once (actually $\frac{L*(L-1)}{2})$ useless attention scalars are computed.} 
+        \item In the end, you compute a $(L,L)$ attention score and pytorch adds the mask.
+        \item Adding $-\infty$ to the score will result in a weight of $0$ after the softmax operations. Basically, we do not take the future words into account when multiplying with the values.
+        \item Adding $0$ to the score will leave the original weights untouched.
+    \end{itemize} 
 
-\section{Question 1: }
 
+\begin{verbatim}
+    Attention mask for a sequence of 5 tokens.
+    10 useless computations for a sequence of 5 tokens
+       [[0., -inf, -inf, -inf, -inf],
+        [0.,   0., -inf, -inf, -inf],
+        [0.,   0.,   0., -inf, -inf],
+        [0.,   0.,   0.,   0., -inf],
+        [0.,   0.,   0.,   0.,   0.]]
+\end{verbatim}
+\end{itemize} 
+
+
+\subsection*{Positional encoding}
+The role of positional encoding is to provide the order of the words in the sentence to the attention mechanism.
+\begin{itemize}
+\item Observation 1: \textit{Order in a sequence matters: "Le chat chasse la souris" has a totally different meaning that "La souris chasse le chat".}
+\item Observation 2: \textit{Unlike recurrent neural networks (RNNs) like the GRU-based architecture we used in lab 1 for translation, the Transformer \cite{vaswani2017} architecture \cite{vaswani2017}
+doesn't process source sentences in a step-by-step manner. Instead, it processes all tokens in the sequence simultaneously.
+This parallel processing capability gives Transformer \cite{vaswani2017}s their efficiency but also means that they lack an inherent sense of position or order in a sequence.}
+\item To solve the issue mentioned above, positional encoding vector is added to the embeddings of tokens before they're fed into the Transformer \cite{vaswani2017}.
+The positional encoding is a set of values that's designed to give the model information about the position of each token within the sequence.
+The goal is to ensure that the resulting combined embeddings (token embedding + positional encoding) will be unique for each position, even if the token is the same.
+\item This also lets the Transformer \cite{vaswani2017} architecture (in its internal computations) behave differently depending on the "distance" between words.
+\end{itemize} 
+
+\section{Question 2: Classification head}
+\subsection*{Language modeling}
+During pre-training, the Transformer \cite{vaswani2017} model transforms each token into a representative feature vector supposed to model the next word.
+
+The classification head used for this purpose maps that vector into a logit/probability of getting the next word.
+This allows to train on a corpus of un-annotated
+sentences. If you want to generate new text or complete a sequence, you can use this classifier. \newline
+But \textbf{if you want to do any other downstream task} (e.g sentiment classification or spam classification)
+\textbf{the original classifier becomes useless.}
+
+\subsection*{Downstream task(like classification)}
+Instead, you can replace the original classification head dedicated to language modeling by a new classification head for a specific downstream task. 
+
+To fine-tune, we can basilly freeze the Transformer \cite{vaswani2017} pretrained weigths and leverage the fact that the representation outputs of the Transformer \cite{vaswani2017}
+will model the tokens in a very sensitive feature space. A powerful feature space which models many inherent things in the sentence.
+Therefore, with a few annotated data samples for your downstream classification task (e.g Google maps comments on restaurants annotated with their star ratings, spam/not spam examples), you can simply retrain a new classifier head.
+\textit{Freezing the Transformer \cite{vaswani2017} weights is not mandatory, you could also fine tune the Transformer \cite{vaswani2017} layers... but it seems a bit risky in my opinion if there's not much data
+to perform the downstream task training.} 
+
+\pagebreak
+\section{Question 3: Trainable parameters}
+
+\begin{table}[]
+    \begin{tabular}{|l|l|l|}
+    \hline
+    \multicolumn{1}{|c|}{Number of trainable parameter}              & \multicolumn{1}{c|}{Language modeling task} & \multicolumn{1}{c|}{Classification task}                                                       \\ \hline
+    \begin{tabular}[c]{@{}l@{}}Transformer \cite{vaswani2017}\\ embeddings\end{tabular} & Trainable                                   & \multicolumn{1}{c|}{\begin{tabular}[c]{@{}c@{}}0 trainable parameters\\ = Frozen\end{tabular}} \\ \hline
+    Transformer \cite{vaswani2017} layers                                               & Trainable                                   & \begin{tabular}[c]{@{}l@{}}0 trainable parameters\\ = Frozen\end{tabular}                      \\ \hline
+    Classifier head                                                  & Trainable                                   & Trainable                                                                                      \\ \hline
+    \end{tabular}
+\end{table}
 
 %------------------------------------------------
 
