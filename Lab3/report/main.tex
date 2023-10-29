@@ -1,4 +1,4 @@
-\documentclass[a4paper]{article} 
+\documentclass[a4paper]{article}
 \input{style/head.tex}
 \newcommand{\yourname}{Balthazar Neveu}
 \newcommand{\youremail}{balthazarneveu@gmail.com}
@@ -73,16 +73,110 @@ to perform the downstream task training.}
 \pagebreak
 \section{Question 3: Trainable parameters}
 
-\begin{table}[]
+\subsection*{Notations}
+
+
+\begin{itemize}
+    \item $V$ is the vocabulary size
+    \item $D$ is the hidden feature dimension which is also equal to the embedding dimension: \textit{hdim} $=$ \textit{embeddingDim} for simplifications.
+    \item $M$ is the number of attention layers.
+    \item $A$ is the number of attention heads.
+    \item $C$ is the number of classes.
+\end{itemize}
+
+\subsection*{Parameters computation}
+
+
+\begin{equation}
+\begin{aligned}
+\text{Total number of parameters} =\\
+\underbrace{V.D}_{\text{embedding look up table}} \\
++ M*\big[
+\underbrace{\overbrace{3}^{\text{Key,Query,Value}} *
+(A*\big(\overbrace{D*\frac{D}{A}}^{\text{weights}} + \overbrace{\frac{D}{A}}^{\text{bias}})\big)}_{\text{Linear embeddings projection}}
++ \underbrace{(\overbrace{D^2}^{\text{weights}} + \overbrace{D}^{\text{bias}})}_{\text{Weighted values linear projection after concatenation}} \\
++ \underbrace{2* (\overbrace{D^2}^{\text{weights}} + \overbrace{D}^{\text{bias}})}_{\text{2 chained feedforward netwoks}}
++ \underbrace{2*(\overbrace{D}^{\text{slope}}+\overbrace{D}^{\text{offset}})}_{\text{2 layer normalizations}}
+    \big] \\
++ \underbrace{\overbrace{D*C}^{\text{weights}} + \overbrace{C}^{\text{bias}}}_{\text{classifier head}} \\
+= V.D + M*\big[ 6D^2+ 10D\big] + C(D+1)
+\end{aligned}
+\end{equation}
+
+
+We're able to cross check:
+\begin{itemize}
+    \item the number of parameters returned by the pytorch \textit{numel} function
+    \item the analytical computation using \textit{sympy} for symbolic computation in python.
+\end{itemize}
+Let's check a simple example with a single layer ($M=1$).
+\begin{tiny}
+\begin{verbatim}
+
++-------------------------------------------------------------+------------+---------------------+------------------+
+|                           Modules                           | Parameters | Analytic validation | Analytic formula |
++-------------------------------------------------------------+------------+---------------------+------------------+
+|                     base.encoder.weight                     |  10000200  |       10000200      |       D*V        |
+|  base.transformer_encoder.layers.0.self_attn.in_proj_weight |   120000   |        120000       |       3*D²       |
+|   base.transformer_encoder.layers.0.self_attn.in_proj_bias  |    600     |         600         |       3*D        |
+| base.transformer_encoder.layers.0.self_attn.out_proj.weight |   40000    |        40000        |        D²        |
+|  base.transformer_encoder.layers.0.self_attn.out_proj.bias  |    200     |         200         |        D         |
+|       base.transformer_encoder.layers.0.linear1.weight      |   40000    |        40000        |        D²        |
+|        base.transformer_encoder.layers.0.linear1.bias       |    200     |         200         |        D         |
+|       base.transformer_encoder.layers.0.linear2.weight      |   40000    |        40000        |        D²        |
+|        base.transformer_encoder.layers.0.linear2.bias       |    200     |         200         |        D         |
+|        base.transformer_encoder.layers.0.norm1.weight       |    200     |         200         |        D         |
+|         base.transformer_encoder.layers.0.norm1.bias        |    200     |         200         |        D         |
+|        base.transformer_encoder.layers.0.norm2.weight       |    200     |         200         |        D         |
+|         base.transformer_encoder.layers.0.norm2.bias        |    200     |         200         |        D         |
+|                  classifier.decoder.weight                  |  10000200  |       10000200      |       C*D        |
+|                   classifier.decoder.bias                   |   50001    |        50001        |        C         |
++-------------------------------------------------------------+------------+---------------------+------------------+
+\end{verbatim}
+\end{tiny}
+
+\break
+
+
+\subsection*{Language modeling vs classification}
+
+
+Let's take an example
+\begin{itemize}
+    \item $V= 50001$
+    \item $D= 200$ hidden feature dimension or embeddings dimension
+    \item $M= 4$ is the number of attention layers.
+    \item $A= 2$ is the number of attention heads (but it does not affect parameters compution)
+\end{itemize}
+
+We have 2 configurations:
+\begin{itemize}
+    \item Language modeling: $C \text{ classes}=V \text{ vocabulary size}$ 
+    \item Sentiment classification: $C \text{ classes}= 2$ (good/bad) 
+    \item Here we'll assume that for the classification fine tuning, the transformer backbone (embeddings+ transformer layers) 
+    is totally frozen and that we only train the classifier's weights. This is a very lightweight fine tuning.
+\end{itemize}
+\begin{table}[h]
     \begin{tabular}{|l|l|l|}
     \hline
-    \multicolumn{1}{|c|}{Number of trainable parameter}              & \multicolumn{1}{c|}{Language modeling task} & \multicolumn{1}{c|}{Classification task}                                                       \\ \hline
-    \begin{tabular}[c]{@{}l@{}}Transformer \cite{vaswani2017}\\ embeddings\end{tabular} & Trainable                                   & \multicolumn{1}{c|}{\begin{tabular}[c]{@{}c@{}}0 trainable parameters\\ = Frozen\end{tabular}} \\ \hline
-    Transformer \cite{vaswani2017} layers                                               & Trainable                                   & \begin{tabular}[c]{@{}l@{}}0 trainable parameters\\ = Frozen\end{tabular}                      \\ \hline
-    Classifier head                                                  & Trainable                                   & Trainable                                                                                      \\ \hline
-    \end{tabular}
+    \multicolumn{1}{|c|}{Number of trainable parameter}              & \multicolumn{1}{c|}{Language modeling task $C=V$} & \multicolumn{1}{c|}{Classification task $C=2$}                                                       \\ \hline
+    \begin{tabular}[c]{@{}l@{}}Word embeddings\end{tabular} & Trainable $V.D$                                   & \multicolumn{1}{c|}{\begin{tabular}[c]{@{}c@{}}$0$ trainable parameters\\ = Frozen  \end{tabular}} \\ \hline
+    $M$ Transformer layers with $A$ heads                                           & Trainable $M*\big[ 6D^2+ 10D\big]$                           & \begin{tabular}[c]{@{}l@{}}$0$ trainable parameters\\ = Frozen \end{tabular}                      \\ \hline
+    Classifier head                                                  & Trainable  $V(D+1)$                                 & Trainable       $2(D+1)$                                                                                \\ \hline   
+    Total (analytics) & $V.D + M*\big[ 6D^2+ 10D\big] + C(D+1)$ & $2(D+1)$ \\ \hline
+    Total parameter & 21M parameters (21018401) & $402$ parameters  \\ \hline
+\end{tabular}
 \end{table}
 
+\subsection*{Remark on the number of attention heads}
+Please note that due to the tricky implementation of torch,
+$A$ does not appear in the final computation (chunk Key $K$, Query $Q$ and Value $V$ into $D$ chunks of  size $\frac{D}{A}$ ).
+This allows keeping the same computation budget with various attention heads.
+This explicitly appears in the \href{https://github.com/pytorch/pytorch/blob/main/torch/nn/modules/activation.py#L990}{pytorch source code}
+of MultiheadAttention
+\begin{verbatim}
+    self.head_dim = embed_dim // num_heads
+\end{verbatim}
 
 \section*{Task 3}
 \begin{verbatim}
