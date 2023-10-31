@@ -225,6 +225,63 @@ Bonjour les gens qui ont été très accueillants et sympathiques.
 
 
 \section{Question 4: Results interpretation}
+We train on 1600 sentences for the downstream task of sentiment analyzis, which is a classification task (good/bad review).
+Some nitty gritty details on the implementation:
+\begin{itemize}
+    \item "Taking the last word feature vector" does not mean take the last element of the tensor output of the model. For each batch element, 
+you need to retrieve the last word before padding.
+    \item I removed the mask to let each word access the whole sentence... there may be a tiny discrepancy with regard to the original Language modeling task
+as the pretrained transformer may not be used to see some words "in the future". I tried both solutions by the way, picked what felt right...
+it didn't change the training curves much by the way.
+\end{itemize}
+
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=.6\textwidth]{figures/accuracy_curves_bugfixed.png}
+    \caption{Training and validation accuracies for different setups (start from scratch, pretrained model, 
+    frozen pretrained model to only train the lightweight classifier)}
+    \label{fig:training_curve}
+\end{figure}
+
+
+From \ref{fig:training_curve}, we can see that starting the classification training from a pretrained transformer model on the language modeling task
+works gets much better accuracy in a single epoch than training a model initalized randomly. $76\% >> 65\%$ after 2 epoch. This is quite incredible and
+This can be explained by the fact that the feature vectors learnt on the language modeling task are very versatile and definitely contain a lot
+of semantic information.
+We see that if we'd taken the best fine tuned pretrained model at epoch=5, we get $80\%$ accuracy when pretraining from scratch goes to $78\%$ (slower but
+still an remarkable performance).
+These training curves also show that in a few epochs, we're able to memorize the whole training dataset (training accuracy goes to $100\%$, loss goes to zero)
+as shown by the dashed red and green curves. With 20M parameters, it's not a surprise. These classifiers may lack a bit of the skill to generalize.
+They may memorize some easy "words" or patterns to recognize whether or not a review is positive or not.
+I also tried to freeze the transformer weights (blue and cyan curves), this training goes faster as there are only a few parameters to train
+in the classifier head (see Question 3 with the assumption I made for the fine-tuning stage)... but the accuracy is not as great.  This still avoids
+the memorization of the training set.
+
+Let's take a look at some results using the fine tuned model based on the pretrained Transformer.
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=.6\textwidth]{figures/distribution_of_sentences_length.png}
+    \caption{Distribution of the length of the sentences when classifier fails or succeed... there's no obvious gap here.}
+    \label{fig:length_distribution}
+\end{figure}
+Finally in \ref{fig:length_distribution}, we show that there's no easy analyzis to make like "the model is unable to classify long sentences"...
+as basically the distribution of sentences length looks the same whether or not they're classified correctly or wrongly.
+
+Some samples of fail below to see some concrete examples where the model failed. These are not so easy as you can see.
+\begin{verbatim}
+GROUNDTRUTH=NEGATIVE -> PREDICTION= POSITIVE
+je ne recommande absoluement pas ce torchon , véritable offense 
+à la mémoire de Michael Jackson . Il repose enfin en paix ...
+\end{verbatim}
+"repose enfin en paix" may still be difficult to classify as it's not a "bad" sentiment but a respectful sentence.
+"torchon" and "offense" are strong words where a model shall not fail and consider it as negative feelings.
+
+\begin{verbatim}
+GROUNDTRUTH=POSITIVE -> PREDICTION= NEGATIVE #
+ce livres et une vrai drogue ! la derniere fois je n' arrivais meme pas a m' arreter 
+! A LIRE ABSOLUMENT !!!! !!!! !!!! !!!
+\end{verbatim}
+"Drogue" may have biased the result toward the negative prediction.
 
 
 
