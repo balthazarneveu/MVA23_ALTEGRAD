@@ -14,3 +14,5 @@ pip install datasets
 pip install evaluate
 pip install sentencepiece
 pip install tensorboardX
+pip install sympy
+pip install prettytable
