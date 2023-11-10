@@ -11,7 +11,7 @@ unzip model_huggingface.zip
 rm model_huggingface.zip
 rm -rf __MACOSX/
 
-
+cd ..
 mkdir data
 cd data
 wget -c "https://nuage.lix.polytechnique.fr/index.php/s/EBHqfR776oCE2Nj/download/cls.books.zip" -O "cls.books.zip"
