@@ -17,7 +17,7 @@ pip install sentencepiece
 pip install tensorboardX
 pip install sympy
 pip install prettytable
-
+pip install accelerate -U
 
 conda create -n llm_bloom python=3.9
 conda activate llm_bloom
@@ -29,3 +29,6 @@ pip install -U git+https://github.com/huggingface/accelerate.git@c9fbb71
 pip install datasets==2.12.0
 pip install loralib==0.1.1
 pip install einops==0.6.1
+pip install accelerate -U
+pip install scipy
+pip install -U datasets
