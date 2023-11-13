@@ -7,13 +7,13 @@
 \begin{document}
 
 \input{style/header.tex}
-\section{Fine tuning Roberta}
+\section{Fine tuning Roberta{liu2019roberta}}
 \subsection*{Question 1 \& Task 1: Model size}
 I used the \textit{sympy} library to compute the number of parameters in the model analytically.
 In the notebook we can compare that the number of parameters computed analytically is the same as the number of parameters computed using the \textit{torch.numel}..
 
 
-When we check the RobertaSmall definition, we can read the following information, which follow the RoBerta paper convention.
+When we check the RobertaSmall definition, we can read the following information, which follow the RoBerta\cite{liu2019roberta} paper convention.
 \begin{verbatim}
 ntokens = 32000 # -> V = vocabulary size
 encoder_layers = nlayers = 4 # -> L = number of (attention+feedforward) transformer unit layers
@@ -85,7 +85,7 @@ $$ \textbf{\#Roberta trainable parameters} = 24D^2 + DV + D(T+2)+ 42D$$
 $$ \textbf{\#Roberta trainable parameters} = 24*512**2+512*32000+512*(256+2)+42*512 = 22829056$$
 
 \subsubsection*{Note on positional embeddings}
-In the original transformer paper, they used a fixed sinusoidal function to compute the positional embedding values, but in RoBERTa they are trainable parameters.
+In the original transformer paper \cite{vaswani2017}, they used a fixed sinusoidal function to compute the positional embedding values, but in BERT\cite{devlin2019bert} and RoBERTa they are trainable parameters.
 $D.(T+2)$ appears in the computation of the trainable positional embeddings. Thanks H. Abdine for clarifying that the +2 is for the start and end of sentence tokens.
 We will consider maximum sentences of $T=256$ tokens + the start \& end of sentence tokens.
 
@@ -261,6 +261,43 @@ Nous vous aiderons à retourner l'article dans les meilleurs délais.
 \end{verbatim}
 
 \subsection*{Question 2: LORA configuration}
+In LORA (low rank adaptation) \cite{hu2021lora}, the authors do not train the original weight matrix $W$ , but instad, we train the parameters of a low rank matrix $BA$ which is used as a residual.
+The idea is that for a language mode to specialize for a specific task by fine-tuning, we do not need to change the original parameters $W$ too much and 
+instead we can add a "residual" coming from a much lower computation (with a low rank matrix). 
+$$y= Wx + BAx$$
+\begin{itemize}
+    \item $x$ is the original feature of size $d_{in}$, $y$ is the output feature vector of size $d_{out}$
+    \item $W$ are the original weights of size $(d_{out}, d_{in})$. In a usual configuration without LORA, we'd get  $y=Wx$.
+    \item $A$ has size $(r, d_{in})$,
+    \item $B$ has size $(d_{out},r)$,
+\end{itemize}
+
+Let's now describe the configuration parameters:
+\begin{verbatim}
+    config = LoraConfig(
+        r=16,
+        lora_alpha=32,
+        target_modules=["query_key_value"],
+        lora_dropout=0.05,
+        bias="none",
+        task_type="CAUSAL_LM",
+    )
+\end{verbatim}
+\begin{itemize}
+    \item \textbf{r}=16: rank of the low rank approximation. 
+    \item \textbf{lora\_alpha} = 32: scaling factor of the whole "low rank approximation" adapter. 
+    Weight matrix is scaled by $\frac{\alpha}{r}$ = here by a factor of 2.
+    Increasing this value will give more importance to the low rank approximation and less importance to the original prediction.
+    \item \textbf{target\_modules}: list of modules to apply LORA to.
+    Here we apply it to the query, key and value projection matrices of the self-attention layer.
+    For instance, we do not apply LORA to the feed forward layers.
+    \item \textbf{lora\_dropout} 5\%: dropout rate applied to the low rank approximation. 
+    This may allow avoid overfitting thanks to the regularization effect of dropout. 
+    Especially when training on a small dataset like we have for the e-commerce Q\&A.
+    \item \textbf{bias}=False: we do not use an additive bias during low rank approximation.
+    \item \textbf{task\_type} = CAUSAL\_LM: whether to use LORA for causal language modeling or for sequence classification for instance.
+    For the Q\& A fine tuning task, it's a still a next word (e.g. causal) prediction task (e.g. LM language modeling, not classification).
+\end{itemize}
 
 \bibliographystyle{plain}
 \bibliography{references} % citation records are in the references.bib document
