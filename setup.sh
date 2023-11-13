@@ -18,6 +18,7 @@ pip install tensorboardX
 pip install sympy
 pip install prettytable
 pip install accelerate -U
+pip install -U scikit-learn
 
 conda create -n llm_bloom python=3.9
 conda activate llm_bloom
