@@ -31,6 +31,7 @@ max_positions = 256 # -> T = max length of a sentence
     \label{fig:roberta_params}
 \end{figure}
 
+\subsubsection*{Analytic formula}
 Total number of trainable parameters in the model (ommiting the language modeling head) is $22829056$ (22.8M):
 
 $L=4$, $V=32000$, $D=512$, $A=8$, $T=256$
@@ -43,6 +44,12 @@ $$L* \textbf{\#Transformer unit} = L*\big[ 3*A*D*(\frac{D}{A}) + 3*A*(\frac{D}{A
 $$ \textbf{\#Roberta trainable parameters} = 24D^2 + DV + D(T+2)+ 42D$$
 
 $$ \textbf{\#Roberta trainable parameters} = 24*512**2+512*32000+512*(256+2)+42*512 = 22829056$$
+
+\subsubsection*{Note on positional embeddings}
+In the original transformer paper, they used a fixed sinusoidal function to compute the positional embedding values, but in RoBERTa they are trainable parameters).
+$D.(T+2)$ appears in the computation of the trainable positional embeddings. Thanks H. Abdine for clarifying that the +2 is for the start and end of sentence tokens.
+We will consider maximum sentences of $T=256$ tokens + the start \& end of sentence tokens.
+
 \subsection*{Task 2: Preprocessing}
 \begin{itemize}
     \item Tokenize all sentences in the corpus using the provided vocabulary
