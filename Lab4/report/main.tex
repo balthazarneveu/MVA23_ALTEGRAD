@@ -122,7 +122,7 @@ of MultiheadAttention
 
 
 
-\subsection*{Task 3 \& 4: Training report \\ Accuracy: $63.5\pm0.8\%$ from scratch VS $80.6\pm1.9\%$ from pretrained}
+\subsection*{Task 3 \& 4: Training report \\ Accuracy: $63.5\%\pm0.8\%$ from scratch VS $80.6\%\pm1.9\%$ from pretrained}
 Training is made of 5 epochs.
 
 $250 \textit{(steps)}*8{(sentence per batch)}=2000$ sentences in the dataset are seen by the network at each epoch.
@@ -202,6 +202,49 @@ tensorboard --logdir ~/MVA23_ALTEGRAD/Lab4/code/tensorboard_logs/sentence_predic
     \label{fig:lr}
 \end{figure}
 
+\break
+
+\subsection*{Task 5: Fine tuning using Hugging Face \\ Accuracy: $82.6\%\pm0.94\%$}
+
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=.8\textwidth]{figures/training_roberta_hugging_face.png}
+    \caption{Validation accuracy while fine tuning Roberta from pretrained model using Hugging Face \textit{run\_glue.py}}
+    \label{fig:roberta_hf}
+\end{figure}
+
+\begin{center}
+    \begin{tabular}{||c c c |} 
+     \hline
+     Seed & Pretrained & Accuracy (\%) \\ [0.5ex] 
+     \hline\hline
+     0 & Yes & 84 \\
+     \hline
+     1 & Yes & 82  \\
+     \hline
+     2 & Yes & 82  \\ 
+     \hline
+    \end{tabular}
+\end{center}
+
+\begin{center}
+    \begin{tabular}{||c c c |} 
+     \hline
+     Pretrained & Average Accuracy (\%)  & Standard deviation  (\%)\\ [0.5ex] 
+     \hline\hline
+     Yes & 82.6  & 0.94\\ 
+     \hline
+    \end{tabular}
+\end{center}
+
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=.8\textwidth]{figures/training_evolution_roberta_hugging_face.png}
+    \caption{Training metrics when fine tuning Roberta from pretrained model using Hugging Face \textit{run\_glue.py}. \\
+    Polynomial scheduler with a 6\% warmup period was provided in the command line but the "polynomial" aspect does not really seem to be taken into account.}
+    \label{fig:roberta_hf_train}
+\end{figure}
+\break
 \section{Fine tuning Bloom}
 \subsection*{Task 6: 4bits quantization}
 4-bits quantization is used to reduce the size of the model in memory.
@@ -228,7 +271,8 @@ Using LORA (low rank adaptation)
 
 
 
-\subsection*{Task 8: Before Fine tuning}
+\subsection*{Task 8: Sampling from Bloom}
+\subsubsection*{Before Fine tuning}
 \begin{verbatim}
 <human>: Comment je peux créer un compte?  
 <assistant>:   Comment je peux créer un compte?  
@@ -254,6 +298,10 @@ Using LORA (low rank adaptation)
     \label{fig:finetuning_bloom}
 \end{figure}
 
+\break
+\subsubsection*{After Fine tuning}
+After fine tuning, the answers look correct although the model does not seem to be stop generating text 
+and keeps repeating the same answer at some point.
 \begin{verbatim}
 - Que se passe-t-il lorsque je retourne un article en déstockage ? 
 
@@ -263,13 +311,7 @@ la procédure de retour. Nous vous aiderons à retourner l'article dans les meil
 Veuillez vous inscrire pour recevoir des notifications sur les articles en déstockage.
 Nous vous aiderons à retourner l'article dans les meilleurs délais.
 Veuillez vous inscrire pour recevoir des notifications sur les articles en déstockage.
-Nous vous aiderons à retourner l'article dans les meilleurs délais.
-Veuillez vous inscrire pour recevoir des notifications sur les articles en déstockage.
-Nous vous aiderons à retourner l'article dans les meilleurs délais.
-Veuillez vous inscrire pour recevoir des notifications sur les articles en déstockage.
-Nous vous aiderons à retourner l'article dans les meilleurs délais.
-Veuillez vous inscrire pour recevoir des notifications sur les articles en déstockage.
-Nous vous aiderons à retourner l'article dans les meilleurs délais.
+...
 \end{verbatim}
 
 \subsection*{Question 2: LORA configuration}
