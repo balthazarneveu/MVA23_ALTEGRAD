@@ -2,7 +2,7 @@
 - [Lab 1](Lab1_Neveu_Balthazar.pdf) : Neural machine translation using vanilla GRU.
 - [Lab 2](Lab2_Neveu_Balthazar.pdf) : Graph mining (get familiar with shortest path / graphlet kernels, spectral clustering) 
 - [Lab 3](Lab3_Neveu_Balthazar.pdf) : Transfer Learning for sentiment analyzis using a pretrained Transformer for language modeling using next word prediction 
-- Lab 4 : Learning how to use a few frameworks (Fairseq, Hugging face) - Fine tune LLM with LoRA
+- [Lab 4](Lab4_Neveu_Balthazar.pdf) : Learning how to use a few frameworks (Fairseq, Hugging face) - Fine tune LLM with LoRA + quantization
 # TensorDock
 :heart: Thank you [Ferdinand Mom](https://github.com/3outeille) for all the tips.
 
