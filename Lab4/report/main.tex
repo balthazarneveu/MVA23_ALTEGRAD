@@ -23,6 +23,7 @@ encoder_attention_heads = nhead = 8 # -> A = number of attentio heads
 max_positions = 256 # -> T = max length of a sentence
 \end{verbatim}
 
+
 \begin{figure}[ht]
     \centering
     \includegraphics[width=.6\textwidth]{figures/roberta_params.png}
@@ -30,6 +31,44 @@ max_positions = 256 # -> T = max length of a sentence
     Embedding layer is followed by $L=4$ Transformer units. Each Transformer unit is composed of a self-attention layer (in purple) and 2 feed forward layers (in orange)}
     \label{fig:roberta_params}
 \end{figure}
+
+\break 
+\begin{tiny}
+\begin{verbatim}
+
+        +-------------------------------------------------------+------------+---------------------+------------------+
+        |                        Modules                        | Parameters | Analytic validation | Analytic formula |
+        +-------------------------------------------------------+------------+---------------------+------------------+
+        |          sentence_encoder.embed_tokens.weight         |  16384000  |       16384000      |       D*V        |
+        |        sentence_encoder.embed_positions.weight        |   132096   |        132096       |    D*(T + 2)     |
+        |      sentence_encoder.layernorm_embedding.weight      |    512     |         512         |        D         |
+        |       sentence_encoder.layernorm_embedding.bias       |    512     |         512         |        D         |
+        +-------------------------------------------------------+------------+---------------------+------------------+
+        |   sentence_encoder.layers.0.self_attn.k_proj.weight   |   262144   |        262144       |        D²        |
+        |    sentence_encoder.layers.0.self_attn.k_proj.bias    |    512     |         512         |        D         |
+        |   sentence_encoder.layers.0.self_attn.v_proj.weight   |   262144   |        262144       |        D²        |
+        |    sentence_encoder.layers.0.self_attn.v_proj.bias    |    512     |         512         |        D         |
+        |   sentence_encoder.layers.0.self_attn.q_proj.weight   |   262144   |        262144       |        D²        |
+        |    sentence_encoder.layers.0.self_attn.q_proj.bias    |    512     |         512         |        D         |
+        |  sentence_encoder.layers.0.self_attn.out_proj.weight  |   262144   |        262144       |        D²        |
+        |   sentence_encoder.layers.0.self_attn.out_proj.bias   |    512     |         512         |        D         |
+        | sentence_encoder.layers.0.self_attn_layer_norm.weight |    512     |         512         |        D         |
+        |  sentence_encoder.layers.0.self_attn_layer_norm.bias  |    512     |         512         |        D         |
+        |          sentence_encoder.layers.0.fc1.weight         |   262144   |        262144       |        D²        |
+        |           sentence_encoder.layers.0.fc1.bias          |    512     |         512         |        D         |
+        |          sentence_encoder.layers.0.fc2.weight         |   262144   |        262144       |        D²        |
+        |           sentence_encoder.layers.0.fc2.bias          |    512     |         512         |        D         |
+        |   sentence_encoder.layers.0.final_layer_norm.weight   |    512     |         512         |        D         |
+        |    sentence_encoder.layers.0.final_layer_norm.bias    |    512     |         512         |        D         |
+        +-------------------------------------------------------+------------+---------------------+------------------+
+        |   sentence_encoder.layers.1.self_attn.k_proj.weight   |   262144   |        262144       |        D²        |
+        |    sentence_encoder.layers.1.self_attn.k_proj.bias    |    512     |         512         |        D         |
+        ...
+        |   sentence_encoder.layers.3.final_layer_norm.weight   |    512     |         512         |        D         |
+        |    sentence_encoder.layers.3.final_layer_norm.bias    |    512     |         512         |        D         |
+        +-------------------------------------------------------+------------+---------------------+------------------+
+\end{verbatim}
+\end{tiny}
 
 \subsubsection*{Analytic formula}
 Total number of trainable parameters in the model (ommiting the language modeling head) is $22829056$ (22.8M):
@@ -46,23 +85,62 @@ $$ \textbf{\#Roberta trainable parameters} = 24D^2 + DV + D(T+2)+ 42D$$
 $$ \textbf{\#Roberta trainable parameters} = 24*512**2+512*32000+512*(256+2)+42*512 = 22829056$$
 
 \subsubsection*{Note on positional embeddings}
-In the original transformer paper, they used a fixed sinusoidal function to compute the positional embedding values, but in RoBERTa they are trainable parameters).
+In the original transformer paper, they used a fixed sinusoidal function to compute the positional embedding values, but in RoBERTa they are trainable parameters.
 $D.(T+2)$ appears in the computation of the trainable positional embeddings. Thanks H. Abdine for clarifying that the +2 is for the start and end of sentence tokens.
 We will consider maximum sentences of $T=256$ tokens + the start \& end of sentence tokens.
 
+
+\subsubsection*{Remark on the number of attention heads}
+Please note that due to the tricky implementation of torch,
+$A$ does not appear in the final computation (chunk Key $K$, Query $Q$ and Value $V$ into $D$ chunks of  size $\frac{D}{A}$ ).
+This allows keeping the same computation budget with various attention heads.
+This explicitly appears in the \href{https://github.com/pytorch/pytorch/blob/main/torch/nn/modules/activation.py#L990}{pytorch source code}
+of MultiheadAttention
+\begin{verbatim}
+    self.head_dim = embed_dim // num_heads
+\end{verbatim}
+
 \subsection*{Task 2: Preprocessing}
 \begin{itemize}
-    \item Tokenize all sentences in the corpus using the provided vocabulary
-    \item Binarize the whole dataset.
-    \item Binarize labels.
+    \item Tokenize all sentences in the corpus using the provided vocabulary. This is mandatory.
+    \item Binarize the whole dataset. The binarized file \textit{(/data/cls-books-bin/input0/train.bin)} weights 569.7kb \\
+     and has clearly been compressed compared to the original training 1.741Mb file \textit{(data/cls.books/train.spm.review)}
+    \item Binarize labels... even though these are 0, 1, we remain in the same system as the rest of the pipeline.
 \end{itemize}
 
 
 
+\subsection*{Task 3 \& 4: Training report \\ Accuracy: $63.5\pm0.8\%$ from scratch VS $80.6\pm1.9\%$ from pretrained}
+Training is made of 5 epochs.
+
+$250 \textit{(steps)}*8{(sentence per batch)}=2000$ sentences in the dataset are seen by the network at each epoch.
+
+When we train from a pretrained model, we make sure that that we're able to reload the checkpoint weights
+\begin{verbatim}
+2023-11-11 17:01:15 | INFO | fairseq.trainer | Loaded checkpoint ../models/RoBERTa_small_fr/model.pt
+\end{verbatim}
+
+For task 4, we provide a fake path and make sure in the logs it's been ignored.
+\begin{verbatim}
+2023-11-13 11:50:53 | INFO | fairseq.trainer | No existing checkpoint found FAKE
+\end{verbatim}
 
 
-\subsection*{Task 3 \& 4: Training report}
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=.6\textwidth]{figures/cpu_training.png}
+    \caption{I did the fine tuning, which takes around 13 minutes per seed on the 4 CPU cores I rented on TensorDock.
+        Manageable as long as you're patient enough.}
+    \label{fig:training_cpu}
+\end{figure}
 
+We then launch tensorboard from the remote machine and forward the port to our local machine. VScode does that automatically for us.
+
+
+
+\begin{verbatim}
+tensorboard --logdir ~/MVA23_ALTEGRAD/Lab4/code/tensorboard_logs/sentence_prediction/books
+\end{verbatim}
 
 \begin{figure}[ht]
     \centering
@@ -71,7 +149,46 @@ We will consider maximum sentences of $T=256$ tokens + the start \& end of sente
     \label{fig:training_roberta}
 \end{figure}
 
+\begin{center}
+    \begin{tabular}{||c c c |} 
+     \hline
+     Seed & Pretrained & Accuracy (\%) \\ [0.5ex] 
+     \hline\hline
+     0 & No & 62.5 \\ 
+     \hline
+     1 & No & 64.5  \\
+     \hline
+     2 & No & 63.5  \\
+     \hline  \hline
+     0 & Yes & 81.5 \\
+     \hline
+     1 & Yes & 78  \\
+     \hline
+     2 & Yes & 82.5  \\ 
+     \hline
+    \end{tabular}
+\end{center}
 
+
+\begin{center}
+    \begin{tabular}{||c c c |} 
+     \hline
+     Pretrained & Average Accuracy (\%)  & Standard deviation  (\%)\\ [0.5ex] 
+     \hline\hline
+     No & 63.5  & 0.81\\ 
+     \hline
+     Yes & 80.6  & 1.92\\
+     \hline
+    \end{tabular}
+\end{center}
+
+
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=.6\textwidth]{figures/lr_curves.png}
+    \caption{Learning rate scheduler (polynomial decay starts with a warmup phase (75 steps here). Learning rate does not exceed $10^{-5}$ as mentioned in the configuration.}
+    \label{fig:lr}
+\end{figure}
 
 \section{Fine tuning Bloom}
 \subsection*{Task 6: 4bits quantization}
