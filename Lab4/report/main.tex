@@ -7,19 +7,58 @@
 \begin{document}
 
 \input{style/header.tex}
+\section{Fine tuning Roberta}
+\subsection*{Question 1: Model size}
 
-\section{Question 1: Model size}
+\subsection*{Task 2: Preprocessing}
+\begin{itemize}
+    \item Tokenize all sentences in the corpus using the provided vocabulary
+    \item Binarize the whole dataset.
+    \item Binarize labels.
+\end{itemize}
 
 
-\section{Task 3: Training report}
+
+
+
+\subsection*{Task 3 \& 4: Training report}
 
 
 \begin{figure}[ht]
     \centering
     \includegraphics[width=.6\textwidth]{figures/training_roberta.png}
-    \caption{Distribution of the length of the sentences when classifier fails or succeed... there's no obvious gap here.}
-    \label{fig:length_distribution}
+    \caption{Validation accuracy during fine tuning with several seeds. Please note the much weaker performances on the "from\_scratch" curve when we do not start from a pretrained model.}
+    \label{fig:training_roberta}
 \end{figure}
+
+
+
+\section{Fine tuning Bloom}
+\subsection*{Task 6: 4bits quantization}
+4-bits quantization is used to reduce the size of the model in memory.
+Putting 650M parameters as float32 will lead to ~2Gb of memory footprint for the parameters.
+While 2 GB for storing parameters might seem manageable, it's important to remember this is just for the parameters alone.
+Operational overhead during training and inference can significantly increase memory requirements.
+
+\begin{verbatim}
+bnb_config = BitsAndBytesConfig(
+   load_in_4bit=True,
+   bnb_4bit_quant_type="nf4",
+   bnb_4bit_use_double_quant=True,
+   bnb_4bit_compute_dtype=torch.bfloat16
+)
+\end{verbatim}
+
+\subsection*{Task 7: 1.57million Trainable parameters using LORA}
+\begin{verbatim}
+Original Bloom model:
+    trainable params: 257003520 || all params: 408219648 || trainable: 62.957 %
+Using LORA (low rank adaptation)
+    trainable params: 1572864 || all params: 409792512 || trainable: 0.384 %
+\end{verbatim}
+
+
+\subsection*{Question 2: LORA configuration}
 
 \bibliographystyle{plain}
 \bibliography{references} % citation records are in the references.bib document
