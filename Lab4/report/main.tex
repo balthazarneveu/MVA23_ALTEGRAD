@@ -7,7 +7,16 @@
 \begin{document}
 
 \input{style/header.tex}
-\section{Fine tuning Roberta{liu2019roberta}}
+\section*{Code}
+For part 1, I set up a 4 CPU TensorDock remote machine to avoid working on my local machine.
+This took some time. Pre-requisite setup.sh \& download\_models.sh .
+
+\begin{itemize}
+    \item code/fine\_tune\_roberta.ipynb : part 1 - trained on 4 CPU TensorDock remote machine.
+    \item code/fine\_tune\_bloom.ipynb : part 2 - trained on Google Collab
+\end{itemize}
+
+\section{Fine tuning Roberta\cite{liu2019roberta}}
 \subsection*{Question 1 \& Task 1: Model size}
 I used the \textit{sympy} library to compute the number of parameters in the model analytically.
 In the notebook we can compare that the number of parameters computed analytically is the same as the number of parameters computed using the \textit{torch.numel}..
