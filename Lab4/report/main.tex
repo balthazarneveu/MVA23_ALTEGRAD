@@ -8,8 +8,41 @@
 
 \input{style/header.tex}
 \section{Fine tuning Roberta}
-\subsection*{Question 1: Model size}
+\subsection*{Question 1 \& Task 1: Model size}
+I used the \textit{sympy} library to compute the number of parameters in the model analytically.
+In the notebook we can compare that the number of parameters computed analytically is the same as the number of parameters computed using the \textit{torch.numel}..
 
+
+When we check the RobertaSmall definition, we can read the following information, which follow the RoBerta paper convention.
+\begin{verbatim}
+ntokens = 32000 # -> V = vocabulary size
+encoder_layers = nlayers = 4 # -> L = number of (attention+feedforward) transformer unit layers
+encoder_embed_dim = 512 # -> D = embedding "feature" dimensions
+encoder_ffn_embed_dim = 512 # -> D = feature dimensions used in the feed forward network
+encoder_attention_heads = nhead = 8 # -> A = number of attentio heads
+max_positions = 256 # -> T = max length of a sentence
+\end{verbatim}
+
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=.6\textwidth]{figures/roberta_params.png}
+    \caption{Evaluating the number of parameters in the Roberta Small model, analytically and comparing to numerical values. \\ 
+    Embedding layer is followed by $L=4$ Transformer units. Each Transformer unit is composed of a self-attention layer (in purple) and 2 feed forward layers (in orange)}
+    \label{fig:roberta_params}
+\end{figure}
+
+Total number of trainable parameters in the model (ommiting the language modeling head) is $22829056$ (22.8M):
+
+$L=4$, $V=32000$, $D=512$, $A=8$, $T=256$
+
+$$\textbf{\#Embedding} = V*D + D*(T+2) + (D + D)$$
+
+$$L* \textbf{\#Transformer unit} = L*\big[ 3*A*D*(\frac{D}{A}) + 3*A*(\frac{D}{A}) + (D^2 +D) + (D + D) + 2*(D^2 + D) + (D + D)\big]$$
+
+
+$$ \textbf{\#Roberta trainable parameters} = 24D^2 + DV + D(T+2)+ 42D$$
+
+$$ \textbf{\#Roberta trainable parameters} = 24*512**2+512*32000+512*(256+2)+42*512 = 22829056$$
 \subsection*{Task 2: Preprocessing}
 \begin{itemize}
     \item Tokenize all sentences in the corpus using the provided vocabulary
