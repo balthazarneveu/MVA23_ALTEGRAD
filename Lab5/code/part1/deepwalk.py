@@ -11,24 +11,26 @@ from gensim.models import Word2Vec
 ############## Task 1
 # Simulates a random walk of length "walk_length" starting from node "node"
 def random_walk(G, node, walk_length):
-
-    ##################
-    # your code here #
-    ##################
-    
-	walk = [str(node) for node in walk]
-	return walk
+    walk = [node]
+    for i in range(walk_length):
+        neighbour = list(G.neighbors[walk[i]])
+        walk.append(neighbour[randint(0, len(neighbour)-1)])
+    walk = [str(node) for node in walk]
+    return walk
 
 
 ############## Task 2
 # Runs "num_walks" random walks from each node
 def generate_walks(G, num_walks, walk_length):
     walks = []
+    for i in range(num_walks):
+        for node in G.nodes():
+            walks.append(random_walk(G, node, walk_length))
     
     ##################
     # your code here #
     ##################
-
+    permuted_walks = np.random.permutation(walks)
     return permuted_walks.tolist()
 
 
