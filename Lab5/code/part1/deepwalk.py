@@ -29,8 +29,19 @@ def random_walk(neighbors_dict: dict, source_node: Union[int, str], walk_length:
 
 ############## Task 2
 # Runs "num_walks" random walks from each node
-def generate_walks(G: nx.Graph, num_walks: int, walk_length: int):
-    # Precompute neighbors with a dictionary...
+def generate_walks(G: nx.Graph, num_walks: int, walk_length: int) -> List[List[Union[int, str]]]:
+    """_summary_
+
+    Args:
+        G (nx.Graph): Graph
+        num_walks (int): number of walks started from each node of the graph
+        walk_length (int): length of the walk = number of nodes visited
+
+    Returns:
+        List[List[Union[int, str]]]: a big list with  (|V|*num_walks, walk_length) elements
+        Example: Crawled Web corpus |V| 33226 , num_walks=10 -> (332260, 20)
+    """
+    # Precompute neighbors with a dictionary... try to speedup a bit
     neighbors_dict = {node: list(G.neighbors(node)) for node in G.nodes()}
 
     walks = []
@@ -38,11 +49,11 @@ def generate_walks(G: nx.Graph, num_walks: int, walk_length: int):
         for node in G.nodes():    
             walks.append(random_walk(neighbors_dict, node, walk_length))
     permuted_walks = np.random.permutation(walks)
-    return permuted_walks.tolist()
+    return permuted_walks.tolist() # (|V|*num_walks, walk_length)
 
 
 # Simulates walks and uses the Skipgram model to learn node representations
-def deepwalk(G, num_walks, walk_length, n_dim):
+def deepwalk(G: nx.Graph, num_walks: int, walk_length: int, n_dim: int) -> Word2Vec:
     print("Generating walks")
     walks = generate_walks(G, num_walks, walk_length)
 

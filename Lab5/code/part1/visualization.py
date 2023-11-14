@@ -9,6 +9,7 @@ from sklearn.decomposition import PCA
 from sklearn.manifold import TSNE
 import matplotlib.pyplot as plt
 from pathlib import Path
+from gensim.models import Word2Vec
 # Loads the web graph
 G = nx.read_weighted_edgelist(
     Path(__file__).parent/'../data/web_sample.edgelist',
@@ -30,7 +31,7 @@ model = deepwalk(G, n_walks, walk_length, n_dim)
 
 ############## Task 4
 # Visualizes the representations of the 100 nodes that appear most frequently in the generated walks
-def visualize(model, n, dim):
+def visualize(model: Word2Vec, n: int, dim: int):
     nodes = model.wv.index_to_key[:n]
     
     DeepWalk_embeddings = np.empty(shape=(n, dim))
