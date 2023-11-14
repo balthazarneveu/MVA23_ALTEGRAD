@@ -19,10 +19,12 @@ class GNN(nn.Module):
 
     def forward(self, x_in, adj):
         ############## Tasks 10 and 13
+        z0 = self.fc1(x_in)
+        z0 = self.relu(torch.mm(adj, z0))
+        z0 = self.dropout(z0) # Do we drop the tensor components?
+
+        z1 = self.fc2(z0)
+        z1 = self.relu(torch.mm(adj, z1))
         
-        ##################
-        # your code here #
-        ##################
-
-
+        x = self.fc3(z1)
         return F.log_softmax(x, dim=1)
