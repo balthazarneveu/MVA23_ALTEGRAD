@@ -28,7 +28,8 @@ model = deepwalk(G, n_walks, walk_length, n_dim)
 # Visualizes the representations of the 100 nodes that appear most frequently in the generated walks
 def visualize(model, n, dim):
 
-    nodes = # your code here
+    nodes = nodes.wv.index_to_key[:n]
+    
     DeepWalk_embeddings = np.empty(shape=(n, dim))
 
     for idx, node in enumerate(nodes):
