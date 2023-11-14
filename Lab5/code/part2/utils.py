@@ -7,14 +7,14 @@ import numpy as np
 import torch
 from sklearn.preprocessing import LabelEncoder
 
-def normalize_adjacency(A):
+def normalize_adjacency(A_no_self_loop):
     ############## Task 9
-
-    ##################
-    # your code here #
-    ##################
-    
-	return A_normalized
+    A = A_no_self_loop + sp.eye(A_no_self_loop.shape[0])
+    D = A.sum(axis=1)
+    inv_d = 1./np.sqrt(D)
+    D_inv = sp.diags(inv_d)
+    A_normalized = D_inv @ A @ D_inv
+    return A_normalized
 
 
 def load_cora():
