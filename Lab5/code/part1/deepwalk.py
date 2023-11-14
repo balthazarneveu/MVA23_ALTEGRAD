@@ -15,10 +15,9 @@ def random_walk(G: nx.Graph, source_node: int, walk_length: int):
     node = source_node
     for _ in range(walk_length-1):
         neighors = list(G.neighbors(node))
-        print(neighors)
         degree = len(neighors)
         degree, G.degree(node)-1
-        node = np.random.choice(degree)
+        node = neighors[np.random.choice(degree)]
         walk.append(node)
     assert len(walk)==walk_length
     return walk
