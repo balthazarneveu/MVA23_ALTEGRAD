@@ -21,9 +21,8 @@ n_dim = 128
 n_walks = 10
 walk_length = 20
 
-##################
-# your code here #
-##################
+model = deepwalk(G, n_walks, walk_length, n_dim)
+
 
 ############## Task 4
 # Visualizes the representations of the 100 nodes that appear most frequently in the generated walks
@@ -31,10 +30,9 @@ def visualize(model, n, dim):
 
     nodes = # your code here
     DeepWalk_embeddings = np.empty(shape=(n, dim))
-    
-    ##################
-    # your code here #
-    ##################
+
+    for idx, node in enumerate(nodes):
+        DeepWalk_embeddings[idx, : ] = model.wv[node]
 
 
     my_pca = PCA(n_components=10)
