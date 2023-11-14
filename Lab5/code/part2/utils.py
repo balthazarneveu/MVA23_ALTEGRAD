@@ -16,6 +16,18 @@ def normalize_adjacency(A_no_self_loop):
     A_normalized = D_inv @ A @ D_inv
     return A_normalized
 
+def normalize_adjacency_TA(A):
+    ############## Task 9 by TA
+    n = A.shape[0]
+    A += sp.eye(n)
+    degs = A.dot(np.ones((n, 1))).flatten()
+    inv_degs = np.power(degs, -1/2)
+    D_inv = sp.diags(inv_degs)
+    # A_normalized = D_inv @ A @ D_inv
+    A_normalized = D_inv.dot(A.dot(D_inv))
+    return A_normalized
+
+
 
 def load_cora():
     idx_features_labels = np.genfromtxt("../data/cora.content", dtype=np.dtype(str))
