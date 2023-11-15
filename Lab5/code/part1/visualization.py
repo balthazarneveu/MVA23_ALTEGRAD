@@ -31,7 +31,16 @@ model = deepwalk(G, n_walks, walk_length, n_dim)
 
 ############## Task 4
 # Visualizes the representations of the 100 nodes that appear most frequently in the generated walks
-def visualize(model: Word2Vec, n: int, dim: int):
+def visualize(model: Word2Vec, n: int, dim: int) -> None:
+    """Use t-SNE to visualize high dimensional 
+    node features a.k.a embeddings (like dim=128)
+    in a nice 2D space. Keep only n points to avoid a messy graph
+
+    Args:
+        model (Word2Vec): _description_
+        n (int): keep n nodes only for the visualization
+        dim (int): dimension of the features (e.g. 128)
+    """
     nodes = model.wv.index_to_key[:n]
     
     DeepWalk_embeddings = np.empty(shape=(n, dim))
