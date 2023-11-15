@@ -30,7 +30,7 @@ def random_walk(neighbors_dict: dict, source_node: Union[int, str], walk_length:
 ############## Task 2
 # Runs "num_walks" random walks from each node
 def generate_walks(G: nx.Graph, num_walks: int, walk_length: int) -> List[List[Union[int, str]]]:
-    """_summary_
+    """Generate num_walks walks at each node of graph G with a length of walk_length.
 
     Args:
         G (nx.Graph): Graph
