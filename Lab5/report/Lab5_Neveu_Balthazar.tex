@@ -14,8 +14,37 @@ This took some time. Pre-requisite setup.sh \& download\_models.sh .
 More info:
 \href{https://github.com/balthazarneveu/MVA23_ALTEGRAD/#readme}{MVA ALTEGRAD Balthazar Neveu on Github}
 
-\section{Fine tuning Roberta\cite{liu2019roberta}}
-\subsection*{Question 1 \& Task 1: Model size}
+\section{Usupervised node embeddings using Deepwalk}
+We're trying to construct meaningful for a graph made of crawled french websites.
+
+\begin{itemize}
+    \item Number of nodes: 33226 . Each node is a website link.
+    \item Number of edges: 354529 . Edges means the presence of hyperlinks between 2 websites.
+    \item Dimension of embeddings of Word2Vec: 128
+    \item Random walk length = 20
+    \item At each node, $n_{walks}=10$ will be pre-stored.
+\end{itemize}
+\subsection*{Notes on task 1}
+- Initial naïve implementation took way too much time. Profiling led me to realize I should not used
+\textit{np.random.choice} but rather \textit{random.randint} to sample the next node in the walk
+among neighbors. \\
+- In addition, I used a dictionary to pre-store the neighbors instead of using the remove redundant calls to \textit{list(G.neighbors(node))}
+\subsection*{Task 4}
+
+
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=.6\textwidth]{figures/tSNE_node_embeddings.png}
+    \caption{t-SNE is used on the high (128) dimensional node embeddings to reduce dimensionality to 2D coordinates,
+    which allows visualization of a few samples (here $n=100$)}
+    \label{fig:node_embeddings}
+\end{figure}
+
+
+
+\begin{verbatim}
+Epoch: 100 loss_train: 0.0640 acc_train: 1.0000 time: 0.0025s
+\end{verbatim}
 
 \bibliographystyle{plain}
 \bibliography{references} % citation records are in the references.bib document
