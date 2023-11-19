@@ -221,17 +221,19 @@ Test set results: loss= 0.5189 accuracy= 0.8708
 \end{figure}
 \break
 \subsection*{Question 4}
-
-\subsection*{Star graph}
+\subsection*{Methodology}
 
 Rational approach is to use Sympy for the following computations.
+
 Here's the example for the star graph
+
 \begin{verbatim}
-from sympy import symbols, Matrix, sqrt, Rational, latex, evaluate, N
-from sympy import Max
+from sympy import symbols, Matrix, sqrt, Rational, latex, evaluate, N, Max
+
 # Input features
 X = Matrix([[1], [1], [1], [1]])
-# First layer
+
+# First layer weights
 W_0 = Matrix([[Rational(1, 2), -Rational(2, 10)]])
 
 
@@ -246,11 +248,12 @@ A = Rational(1, 2) * Matrix([
     [u, 0, 0, 1]
 ])
 
-# First layer
+# First layer hidden unit
 Z_0_before_relu = A*X*W_0
 Z_0 = Z_0_before_relu.applyfunc(lambda x: Max(0, x))
 
-# Second layer - second line will not be used
+# Second layer weights 
+# Note: second row of W_1 will not be used as Z_0 second column is full of zeros
 W_1 = Matrix([
     [Rational(3,10), -Rational(2,5), Rational(4,5), Rational(1,2)],
     [-1.1, 0.6, -0.1, 0.7]
@@ -276,6 +279,10 @@ print(f"{Z0} \n{np.array(N(Z_0))}")
 print(f"{Z1} \n{np.array(N(Z_1))}")
 \end{verbatim}
 \hrule
+
+\break
+\subsection*{Star graph}
+
     
 $ A_{S^4} = \begin{bmatrix}
     0  &  1  &  1  &  1 \\
