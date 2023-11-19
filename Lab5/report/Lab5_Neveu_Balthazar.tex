@@ -95,7 +95,6 @@ Notebook is available to reproduce these experiments.
     \label{fig:m_components}
 \end{figure}
 
-\break
 
 \section{Node classification}
 \subsection*{Task 5: visualization of Zachary's karate club}
@@ -107,23 +106,22 @@ Notebook is available to reproduce these experiments.
     \label{fig:karate_labeled}
 \end{figure}
 
+\break
 \subsection*{Task 6/7/8: Classification of Zachary's karate club}
 \begin{verbatim}
     Deep walk embeddings: accuracy = 1.000
     Spectral embeddings accuracy =  0.857
 \end{verbatim}
-These resuls are given for a training ratio of 80\%. Please refer to \ref{fig:deepwalk_vs_laplacian_embdeddings}
-for a deeper evaluation.
-
+These results are given for a training ratio of 80\% on a single training/validation set split. 
+A more fair evaluation reveals an accuracy of 99\% with Deep walk embeddings accuracy and 79\% with Spectral embdeddings,
+in average over 1000 runs, with a training data ratio of 80\%,
+please refer to \ref{fig:deepwalk_vs_laplacian_embdeddings}.
 \subsection*{Comparison of DeepWalk embeddings and spectral embeddings}
+The code for this part can be found in \textit{code/part1/classifiers\_comparisons.py}
+
+
 Unsupervised deepwalk embeddings are much more powerful than spectral embeddings when evaluated on
 the weakly supervised classification task as shown on \ref{fig:deepwalk_vs_laplacian_embdeddings}.
-\textit{Please keep in mind that as the training ratio increase, we also get less data for evaluation.
-Accuracies reported for 95\% of training data leave 5\% if unlabelled data for evaluation,
-thus not making a really fair job.} It is impressive to see that with only 30\% of the labels being given, deep walk
-embeddings based classifier is able to classify the remaining 70\%unlabelled nodes with an accuracy of 95\%.
-Spectral features give 50\% accuracy in this same regime, meaning they're nearly not informative in this case.
-
 \begin{figure}[ht]
     \centering
     \includegraphics[width=1.\textwidth]{figures/deepwalk_vs_laplacian_embeddings_1000runs.png}
@@ -131,6 +129,13 @@ Spectral features give 50\% accuracy in this same regime, meaning they're nearly
     min \& max accuracy and standard deviation over the 1000 runs are reported.}
     \label{fig:deepwalk_vs_laplacian_embdeddings}
 \end{figure}
+\textit{Please keep in mind that as the training ratio increase, we also get less data for evaluation.
+Accuracies reported for 95\% of training data leave 5\% if unlabelled data for evaluation,
+thus not making a really fair job.} It is impressive to see that with only 30\% of the labels being given, deep walk
+embeddings based classifier is able to classify the remaining 70\%unlabelled nodes with an accuracy of 95\%.
+Spectral features give 50\% accuracy in this same regime, meaning they're nearly not informative in this case.
+
+
 
 \break
 
