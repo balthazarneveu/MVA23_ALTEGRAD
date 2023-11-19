@@ -1,5 +1,6 @@
 """
 Deep Learning on Graphs - ALTEGRAD - Nov 2023
+Part 1 : Deep walk embeddings creations
 """
 import numpy as np
 import networkx as nx

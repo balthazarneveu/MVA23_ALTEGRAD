@@ -1,5 +1,6 @@
 """
 Deep Learning on Graphs - ALTEGRAD - Nov 2023
+Part 3: Graph neural networks
 """
 
 import numpy as np

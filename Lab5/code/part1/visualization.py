@@ -1,5 +1,7 @@
 """
 Deep Learning on Graphs - ALTEGRAD - Nov 2023
+Part 1 : Deep walk embeddings used to "summarize" a graph visualization.
+=> put DeepWalk embeddings in a low dimensional space using T-SNE
 """
 
 import networkx as nx
