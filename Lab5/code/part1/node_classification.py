@@ -75,8 +75,8 @@ def deepwalk_embeddings(G: nx.Graph) -> np.ndarray:
 
     embeddings = np.zeros((n, n_dim))
     nodes = model.wv.index_to_key[:n]
-    print(nodes)
-    print(G.nodes())
+    # print(nodes)
+    # print(G.nodes())
     for i, node in enumerate(G.nodes()):
         embeddings[i,:] = model.wv[node]
     return embeddings
@@ -107,7 +107,6 @@ def classification(X_train: np.ndarray, y_train: np.ndarray, X_test: np.ndarray,
     clf.fit(X_train, y_train)
     y_pred = clf.predict(X_test)
     accuracy = accuracy_score(y_test, y_pred)
-    print(f"{accuracy=:.3f}")
     return accuracy
 
 ############## Task 8
@@ -129,58 +128,17 @@ def spectral_embeddings(graph: nx.Graph, k=2) -> np.ndarray:
     )
     sorted_eigen_values = sorted_eigen_values.real
     u_matrix = eigen_vectors.real # matrix of k sorted eigen vector
-    print(u_matrix.shape)
     return u_matrix
 
-
-def study_classifiers(G: nx.Graph, embedding_list:Dict[str, np.ndarray], labels: np.ndarray, n_runs=10):
-    train_ratios = np.linspace(0.2, 0.9, 30)
-    plt.figure(figsize=(5, 5))
-    for embed_type_index, (name, embedding) in enumerate(embedding_list.items()):
-        color = "gcr"[embed_type_index]
-        accuracies = np.zeros_like(train_ratios)
-        std_dev = np.zeros_like(train_ratios)
-        mini, maxi = np.zeros_like(train_ratios), np.zeros_like(train_ratios)
-        for idx, train_ratio in enumerate(train_ratios):
-            current_accuracies = np.zeros(n_runs)
-            for idx_seed, seed in enumerate(range(42, 42+n_runs)):
-                X_train, y_train, X_test, y_test = shuffle_split_dataset(
-                    embedding, labels,
-                    G.number_of_nodes(),
-                    train_ratio=train_ratio,
-                    seed=seed
-                )
-                current_accuracies[idx_seed] = classification(X_train, y_train, X_test, y_test)
-            accuracies[idx] = np.mean(current_accuracies)
-            std_dev[idx] = np.std(current_accuracies)
-            mini[idx], maxi[idx] = np.min(current_accuracies), np.max(current_accuracies)
-            plt.plot([train_ratio, train_ratio], [mini[idx], maxi[idx]], "-^", alpha=0.2, color=color)
-        plt.plot(train_ratios, accuracies, "-o", color=color, label=name, linewidth=5)
-        
-        # plt.errorbar(train_ratios, accuracies, std_dev, linestyle='None', marker='^')
-    plt.xlim(0, 1.)
-    plt.ylim(0, 1.01)
-    plt.xlabel("Training ratio")
-    plt.ylabel("Classifier accuracy")
-    plt.grid()
-    plt.legend()
-    plt.show()
-
-def main(viz=True):
+def main():
     G, y_true = load_labelled_graph()
+    visualize_network(G, y_true, title="Groundtruth")
     emb_lap = spectral_embeddings(G)
-    if viz:
-        visualize_network(G, y_true, title="Groundtruth")
     emb_dw = deepwalk_embeddings(G)
-    study_classifiers(
-        G,
-        {
-            "Deepwalk embeddings": emb_dw,
-            "Laplacian embeddings": emb_lap,
-        },
-        y_true
-    )
-    
+    n = G.number_of_nodes()
+    accuracy_dw = classification(*shuffle_split_dataset(emb_dw,  y_true, n))
+    accuracy_lap = classification(*shuffle_split_dataset(emb_lap, y_true, n))
+    print(f"Deep walk embeddings: accuracy={accuracy_dw=:.3f} | Spectral embeddings accuracy=  {accuracy_lap=:.3f}")
 
 if __name__ == "__main__":
-    main(viz=False)
+    main()
