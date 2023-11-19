@@ -102,24 +102,37 @@ Notebook is available to reproduce these experiments.
 
 \begin{figure}[ht]
     \centering
-    \includegraphics[width=1.\textwidth]{figures/labeled_karate_graph.png}
+    \includegraphics[width=0.5\textwidth]{figures/labeled_karate_graph.png}
     \caption{Visualization of the Karate graph with 2 labels (groundtruth)}
     \label{fig:karate_labeled}
 \end{figure}
 
+\subsection*{Task 6/7/8: Classification of Zachary's karate club}
+\begin{verbatim}
+    Deep walk embeddings: accuracy = 1.000
+    Spectral embeddings accuracy =  0.857
+\end{verbatim}
+These resuls are given for a training ratio of 80\%. Please refer to \ref{fig:deepwalk_vs_laplacian_embdeddings}
+for a deeper evaluation.
 
-\subsection*{Task 6/7: Classification of Zachary's karate club}
-
-
-\subsection*{Task 8: Comparison of DeepWalk embeddings and spectral embeddings}
+\subsection*{Comparison of DeepWalk embeddings and spectral embeddings}
+Unsupervised deepwalk embeddings are much more powerful than spectral embeddings when evaluated on
+the weakly supervised classification task as shown on \ref{fig:deepwalk_vs_laplacian_embdeddings}.
+\textit{Please keep in mind that as the training ratio increase, we also get less data for evaluation.
+Accuracies reported for 95\% of training data leave 5\% if unlabelled data for evaluation,
+thus not making a really fair job.} It is impressive to see that with only 30\% of the labels being given, deep walk
+embeddings based classifier is able to classify the remaining 70\%unlabelled nodes with an accuracy of 95\%.
+Spectral features give 50\% accuracy in this same regime, meaning they're nearly not informative in this case.
 
 \begin{figure}[ht]
     \centering
-    \includegraphics[width=1.\textwidth]{figures/deepwalk_vs_laplacian_embeddings.png}
-    \caption{Average classification accuracy of 10 runs (various seeds). Also report the min \& max accuracy}
+    \includegraphics[width=1.\textwidth]{figures/deepwalk_vs_laplacian_embeddings_1000runs.png}
+    \caption{Average classification accuracy over 1000 runs (various seeds) for various training ratios. 
+    min \& max accuracy and standard deviation over the 1000 runs are reported.}
     \label{fig:deepwalk_vs_laplacian_embdeddings}
 \end{figure}
 
+\break
 
 \section{Graph Neural Networks}
 \subsection*{Task 11: GNN Classification on karate club - one-hot encoded input features \\ 100\% accuracy}
