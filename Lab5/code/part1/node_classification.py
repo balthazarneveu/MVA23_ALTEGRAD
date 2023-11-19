@@ -72,6 +72,15 @@ accuracy = accuracy_score(y_test, y_pred)
 print(accuracy)
 ############## Task 8
 # Generates spectral embeddings
+def compute_rw_laplacian(graph: nx.Graph, sparse=False, debug_prints=False) -> np.ndarray:
+    adj = nx.adjacency_matrix(graph)
+    deg = np.sum(adj, axis=1) 
+    # This matches the definition of the degree
+    d = 1./deg
+    laplacian = eye(adj.shape[0])- diags(d).dot(adj) # keeps the spasity!
+    return laplacian
+
+
 
 ##################
 # your code here #
