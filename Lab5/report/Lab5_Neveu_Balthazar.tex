@@ -140,19 +140,65 @@ Spectral features give 50\% accuracy in this same regime, meaning they're nearly
 \break
 
 \section{Graph Neural Networks}
+\subsection*{Question 3}
+
+
+We're looking at the scenario where no self-loops were added to the graph (e.g. if we'd work with the raw adjacency matrix after normalization
+$D^{-\frac{1}{2}} A D^{-\frac{1}{2}}$). This is a bad idea and we'll try to explain why.
+\begin{itemize}
+    \item The node's hidden state is solely a function of its neighbors' features.
+    \item The node's own features are not considered directly, potentially losing the unique characteristics of the node itself. This might lead to less effective representations.
+\end{itemize}
+
+
+\subsubsection*{Single layer case}
+Consider a single layer network, removing the self-loop makes the learning task more difficult as the node feature itself is not used, only its neighbor features are used and aggregated.
+\\
+\\
+Take the example of the \textbf{star graph}. 
+\begin{itemize}
+    \item Satellite nodes become indistiguishable as they will only receive the same message from the central node. 
+    \item After the first convolution layer, all satellite nodes have the same feature.
+    \item Add the self-loop back and all satellite nodes are different and keep a trace of their input feature.
+\end{itemize}
+
+Intuitively, the node feature may contain unique characteristics: 
+if we provide one-hot encoded vectors (like we do in task 11) as input features to a standard classifier (ignoring the graph aspects e.g. setting the adjacency graph to identity),
+we could memorize most of the training graph labels at training time. Test accuracy would be low though as the graph structure is ignored.
+These self loops allow passing the current node feature to the next layer.\\
+Note: \textit{nn.Linear(n\_feat, n\_classes)} is able to totally overfit and memorize the training node labels when providing input features.
+Putting a mix of message passing from the neighbors and this memorization ability makes a GNN sucessful.
+
+\subsubsection*{Two layer case}
+For the star graph case
+\begin{itemize}
+    \item The center node will recover its original feature (as the average over all satellite nodes features which were made identical afterthe first layer).
+    \item After the second convolution layer, all satellites nodes have the same feature (broadcast of the central node feature).
+\end{itemize}
 \subsection*{Task 11: GNN Classification on karate club - one-hot encoded input features \\ 100\% accuracy}
 \begin{verbatim}
-Epoch: 100 loss_train: 0.0640 acc_train: 1.0000 time: 0.0025s
+Epoch: 100 loss_train: 0.0016 acc_train: 1.0000 time: 0.0152s
+Test set results: loss= 0.0001 accuracy= 1.0000
 \end{verbatim}
 
-\subsection*{Task 12: GNN Classification on karate club - identical input features \\ 66.6\% accuracy}
-Network cannot make a distinction between the input nodes features.
-For instance, it prevents the network from memorizing a mapping between the training node "indexes" and the output class.
-It forces the network to detect inherent similarity.
-
+\subsection*{Task 12: GNN Classification on karate club - identical input features \\ 28.6\% accuracy}
 \begin{verbatim}
-Epoch: 100 loss_train: 0.6528 acc_train: 0.6667 time: 0.0227s
+Epoch: 100 loss_train: 0.6655 acc_train: 0.6667 time: 0.0059s
+Test set results: loss= 0.7871 accuracy= 0.2857
 \end{verbatim}
+    
+Network cannot make a distinction between the input nodes features.
+
+For instance, it prevents the network from memorizing a mapping between the training node "indexes" and the output class.
+It inherently forces the network to recognize structure patterns from the edges to label the nodes both at training and inference time...
+which makes the classification task almost impossible 
+(it could work if the 2 clusters had 2 very different structures, like a star graph and a clique connected to each other with like 1 link,
+there could be a chance identical features would allow classifying the 2 groups.)
+
+In the case of on-hot encoded input features, at training time, the network can memorize that some labels correspond
+to a given class and later at inference time, convolution allow to spread this information to unlabelled nodes...
+wich results in far better results.
+
 \bibliographystyle{plain}
 \bibliography{references} % citation records are in the references.bib document
 

@@ -27,6 +27,7 @@ def train_and_classify(edges_path, labels_path, identical_input_features=False):
     dropout_rate = 0.1
 
     # Loads the karate network
+    # @TODO: reuse graph loader from part 1
     G = nx.read_weighted_edgelist(edges_path, delimiter=' ', nodetype=int, create_using=nx.Graph())
     print(G.number_of_nodes())
     print(G.number_of_edges())
@@ -113,6 +114,11 @@ def train_and_classify(edges_path, labels_path, identical_input_features=False):
 
     # Testing
     test()
+
 if __name__ == "__main__":
     DATA_ROOT = Path(__file__).parent/'../data'
-    train_and_classify(DATA_ROOT/'karate.edgelist', DATA_ROOT/'karate_labels.txt', identical_input_features=True)
+    graph_path = DATA_ROOT/'karate.edgelist'
+    label_path = DATA_ROOT/'karate_labels.txt'
+    for identical_input_features in [False, True]:
+        train_and_classify(graph_path, label_path, identical_input_features=identical_input_features)
+    

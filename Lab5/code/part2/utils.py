@@ -8,7 +8,7 @@ import torch
 from sklearn.preprocessing import LabelEncoder
 
 ############## Task 9
-def normalize_adjacency(A_no_self_loop: sp.sparray) -> sp.sparray:
+def normalize_adjacency(A_no_self_loop: sp.sparray, add_self_loops=True) -> sp.sparray:
     """Compute normalized adjacency matrix  D^-1/2 . A . D^-1/2
 
     Args:
@@ -17,7 +17,10 @@ def normalize_adjacency(A_no_self_loop: sp.sparray) -> sp.sparray:
     Returns:
         sp.sparray: Normalized adjacency matrix
     """
-    A = A_no_self_loop + sp.eye(A_no_self_loop.shape[0])
+    if add_self_loops:
+        A = A_no_self_loop + sp.eye(A_no_self_loop.shape[0])
+    else:
+        A = A_no_self_loop
     D = A.sum(axis=1) # degree is the sum over columns
     # Compute D^-1/2
     inv_d = 1./np.sqrt(D) 
