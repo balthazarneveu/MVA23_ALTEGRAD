@@ -8,15 +8,13 @@
 
 \input{style/header.tex}
 \section*{Code}
-For part 1, I set up a 4 CPU TensorDock remote machine to avoid working on my local machine.
-This took some time. Pre-requisite setup.sh \& download\_models.sh .
 
 More info:
 \href{https://github.com/balthazarneveu/MVA23_ALTEGRAD/#readme}{MVA ALTEGRAD Balthazar Neveu on Github}
 
 \section{Unsupervised node embeddings using Deepwalk}
 
-We're trying to construct meaningful for a graph made of crawled french websites.
+We're trying to construct meaningful embeddings for a graph made of crawled french websites.
 
 \begin{itemize}
     \item Number of nodes: 33226 . Each node is a website link.
@@ -152,6 +150,8 @@ $D^{-\frac{1}{2}} A D^{-\frac{1}{2}}$). This is a bad idea and we'll try to expl
 
 
 \subsubsection*{Single layer case}
+\hrule
+
 Consider a single layer network, removing the self-loop makes the learning task more difficult as the node feature itself is not used, only its neighbor features are used and aggregated.
 \\
 \\
@@ -169,7 +169,12 @@ These self loops allow passing the current node feature to the next layer.\\
 Note: \textit{nn.Linear(n\_feat, n\_classes)} is able to totally overfit and memorize the training node labels when providing input features.
 Putting a mix of message passing from the neighbors and this memorization ability makes a GNN sucessful.
 
+
+
+
 \subsubsection*{Two layer case}
+\hrule
+
 For the star graph case
 \begin{itemize}
     \item The center node will recover its original feature (as the average over all satellite nodes features which were made identical afterthe first layer).
@@ -178,7 +183,7 @@ For the star graph case
 \subsection*{Task 11: GNN Classification on karate club - one-hot encoded input features \\ 100\% accuracy}
 \begin{verbatim}
 Epoch: 100 loss_train: 0.0016 acc_train: 1.0000 time: 0.0152s
-Test set results: loss= 0.0001 accuracy= 1.0000
+Test set results: loss= 01 accuracy= 1.0000
 \end{verbatim}
 
 \subsection*{Task 12: GNN Classification on karate club - identical input features \\ 28.6\% accuracy}
@@ -214,11 +219,171 @@ Test set results: loss= 0.5189 accuracy= 0.8708
     High dimensional $(32)$ hidden feature vectors of 542 test nodes are visualized in a low 2D dimension space using T-SNE}
     \label{fig:tsne_cora}
 \end{figure}
-
+\break
 \subsection*{Question 4}
 
+\subsection*{Star graph}
 
-\bibliographystyle{plain}
-\bibliography{references} % citation records are in the references.bib document
+Rational approach is to use Sympy for the following computations.
+Here's the example for the star graph
+\begin{verbatim}
+from sympy import symbols, Matrix, sqrt, Rational, latex, evaluate, N
+from sympy import Max
+# Input features
+X = Matrix([[1], [1], [1], [1]])
+# First layer
+W_0 = Matrix([[Rational(1, 2), -Rational(2, 10)]])
+
+
+### STAR GRAPH
+# Define the variable u
+u = 1/sqrt(2)
+# Normalized adjacency matrix (computed semi manually)
+A = Rational(1, 2) * Matrix([
+    [Rational(1, 2), u, u, u],
+    [u, 1, 0, 0],
+    [u, 0, 1, 0],
+    [u, 0, 0, 1]
+])
+
+# First layer
+Z_0_before_relu = A*X*W_0
+Z_0 = Z_0_before_relu.applyfunc(lambda x: Max(0, x))
+
+# Second layer - second line will not be used
+W_1 = Matrix([
+    [Rational(3,10), -Rational(2,5), Rational(4,5), Rational(1,2)],
+    [-1.1, 0.6, -0.1, 0.7]
+])
+Z_1 = (A*Z_0*W_1).applyfunc(lambda x: Max(0, x))
+\end{verbatim}
+
+
+\hrule
+Here's an additional validation to check that the analytic expressions match with the numerical computation
+\begin{verbatim}
+from utils import normalize_adjacency
+import networkx as nx
+import numpy as np
+G = nx.star_graph(3)
+Anorm = normalize_adjacency(nx.adjacency_matrix(G))
+X = np.ones((4, 1))
+W0 = np.array([[0.5, -0.2]])
+W1 = np.array([[0.3, -0.4, 0.8, 0.5], [-1.1, 0.6, -0.1, 0.7]])
+Z0 = (Anorm@X@W0).clip(0, None)
+Z1 = (Anorm@Z0@W1).clip(0, None)
+print(f"{Z0} \n{np.array(N(Z_0))}")
+print(f"{Z1} \n{np.array(N(Z_1))}")
+\end{verbatim}
+\hrule
+    
+$ A_{S^4} = \begin{bmatrix}
+    0  &  1  &  1  &  1 \\
+    1  &  0  &  0  &  0 \\
+    1  &  0  &  0  &  0 \\
+    1  &  0  &  0  &  0 
+\end{bmatrix}
+$
+
+$\tilde{A}_{S^4} = A_{S^4} + I = \begin{bmatrix}
+    1  &  1  &  1  &  1 \\
+    1  &  1  &  0  &  0 \\
+    1  &  0  &  1  &  0 \\
+    1  &  0  &  0  &  1 
+  \end{bmatrix}
+$
+
+$ \tilde{D_{S^4}} = \text{diag}[4, 2, 2, 2] = \begin{bmatrix}
+    4  &  0  &  0  &  0 \\
+    0  &  2  &  0  &  0 \\
+    0  &  0  &  2  &  0 \\
+    0  &  0  &  0  &  2 
+\end{bmatrix}$
+
+
+$\tilde{D_{S^4}}^{-\frac{1}{2}} = \text{diag}[\frac{1}{2}, \frac{1}{\sqrt{2}}, \frac{1}{\sqrt{2}}, \frac{1}{\sqrt{2}}] = 
+\begin{bmatrix}
+    \frac{1}{2}  &  0  &  0  &  0 \\
+    0  &  \frac{1}{\sqrt{2}}  &  0  &  0 \\
+    0  &  0  &  \frac{1}{\sqrt{2}}  &  0 \\
+    0  &  0  &  0  &  \frac{1}{\sqrt{2}} 
+\end{bmatrix}$
+
+
+$\hat{A_{S^4}} = \tilde{D_{S^4}}^{-\frac{1}{2}} .\tilde{A}_{S^4} .\tilde{D_{S^4}}^{-\frac{1}{2}} $
+
+
+
+
+
+$\hat{A_{S^4}} = \begin{bmatrix}
+    \frac{1}{4} &  \frac{1}{2\sqrt{2}}  &  \frac{1}{2\sqrt{2}}  &  \frac{1}{2\sqrt{2}} \\
+    \frac{1}{2\sqrt{2}}  &  \frac{1}{2}  &  0 &  0\\
+    \frac{1}{2\sqrt{2}}  &  0 &  \frac{1}{2}  &  0\\
+    \frac{1}{2\sqrt{2}}  &  0 &  0 &  \frac{1}{2} 
+\end{bmatrix} =
+\left[\begin{matrix}\frac{1}{4} & \frac{\sqrt{2}}{4} & \frac{\sqrt{2}}{4} & \frac{\sqrt{2}}{4}\\\frac{\sqrt{2}}{4} & \frac{1}{2} & 0 & 0\\\frac{\sqrt{2}}{4} & 0 & \frac{1}{2} & 0\\\frac{\sqrt{2}}{4} & 0 & 0 & \frac{1}{2}\end{matrix}\right]
+\approx \begin{bmatrix}
+    0.25 &  0.354 &  0.354 &  0.354\\
+    0.354 &  0.5 &  0 &  0\\
+    0.354 &  0 &  0.5 &  0\\
+    0.354 &  0 &  0 &  0.5
+\end{bmatrix}
+$
+
+Let's use $u := \frac{1}{\sqrt{2}}$
+
+$\hat{A_{S^4}}.X. W^{0} = \frac{1}{4}\begin{bmatrix}
+    \frac{1}{2} + 3u &  -? \\
+    u+1 &  -? \\
+    u+1 &  -? \\
+    u+1 &  -? \\
+\end{bmatrix}$
+
+$Z^{0} = \begin{bmatrix}
+    \frac{1}{2} + 3u & 0 \\
+    u+1 &  0 \\
+    u+1 &  0 \\
+    u+1 &  0 \\
+\end{bmatrix}
+$
+
+
+I used the $?$ symbol to skip computation because there's no need to perform this computation since these are negative numbers
+which will be zeroed by $f=\text{ReLU}$
+
+
+$Z^{0} = \left[\begin{matrix}\frac{1}{8} + \frac{3 \sqrt{2}}{8} & 0\\\frac{\sqrt{2}}{8} + \frac{1}{4} & 0\\\frac{\sqrt{2}}{8} + \frac{1}{4} & 0\\\frac{\sqrt{2}}{8} + \frac{1}{4} & 0\end{matrix}\right]
+\approx \begin{bmatrix}
+    0.655 &  0\\
+    0.427 &  0\\
+    0.427 &  0\\
+    0.427 &  0
+  \end{bmatrix}
+$
+
+
+To compute $Z^{1}$, we have to nottice straight away that the second row of $W^{1}$ will be multiplied only by $0$
+
+$W^{1} = \left[\begin{matrix}\frac{3}{10} & - \frac{2}{5} & \frac{4}{5} & \frac{1}{2}\\-1.1 & 0.6 & -0.1 & 0.7\end{matrix}\right]$
+
+Performing computation manually does not make sense here and the room for mistake is huge.
+We use symbolic calculus to perform the computation correctly.
+
+$\hat{A_{S^4}}.Z^{0}. W^{1} = 
+\left[\begin{matrix}\frac{3}{320} + \frac{9 \sqrt{2}}{320} + \frac{9 \sqrt{2} \left(\frac{\sqrt{2}}{8} + \frac{1}{4}\right)}{40} & - \frac{3 \sqrt{2} \left(\frac{\sqrt{2}}{8} + \frac{1}{4}\right)}{10} - \frac{3 \sqrt{2}}{80} - \frac{1}{80} & \frac{1}{40} + \frac{3 \sqrt{2}}{40} + \frac{3 \sqrt{2} \left(\frac{\sqrt{2}}{8} + \frac{1}{4}\right)}{5} & \frac{1}{64} + \frac{3 \sqrt{2}}{64} + \frac{3 \sqrt{2} \left(\frac{\sqrt{2}}{8} + \frac{1}{4}\right)}{8}\\\frac{3 \sqrt{2}}{160} + \frac{3}{80} + \frac{3 \sqrt{2} \cdot \left(\frac{1}{8} + \frac{3 \sqrt{2}}{8}\right)}{40} & - \frac{\sqrt{2} \cdot \left(\frac{1}{8} + \frac{3 \sqrt{2}}{8}\right)}{10} - \frac{1}{20} - \frac{\sqrt{2}}{40} & \frac{\sqrt{2}}{20} + \frac{1}{10} + \frac{\sqrt{2} \cdot \left(\frac{1}{8} + \frac{3 \sqrt{2}}{8}\right)}{5} & \frac{\sqrt{2}}{32} + \frac{1}{16} + \frac{\sqrt{2} \cdot \left(\frac{1}{8} + \frac{3 \sqrt{2}}{8}\right)}{8}\\\frac{3 \sqrt{2}}{160} + \frac{3}{80} + \frac{3 \sqrt{2} \cdot \left(\frac{1}{8} + \frac{3 \sqrt{2}}{8}\right)}{40} & - \frac{\sqrt{2} \cdot \left(\frac{1}{8} + \frac{3 \sqrt{2}}{8}\right)}{10} - \frac{1}{20} - \frac{\sqrt{2}}{40} & \frac{\sqrt{2}}{20} + \frac{1}{10} + \frac{\sqrt{2} \cdot \left(\frac{1}{8} + \frac{3 \sqrt{2}}{8}\right)}{5} & \frac{\sqrt{2}}{32} + \frac{1}{16} + \frac{\sqrt{2} \cdot \left(\frac{1}{8} + \frac{3 \sqrt{2}}{8}\right)}{8}\\\frac{3 \sqrt{2}}{160} + \frac{3}{80} + \frac{3 \sqrt{2} \cdot \left(\frac{1}{8} + \frac{3 \sqrt{2}}{8}\right)}{40} & - \frac{\sqrt{2} \cdot \left(\frac{1}{8} + \frac{3 \sqrt{2}}{8}\right)}{10} - \frac{1}{20} - \frac{\sqrt{2}}{40} & \frac{\sqrt{2}}{20} + \frac{1}{10} + \frac{\sqrt{2} \cdot \left(\frac{1}{8} + \frac{3 \sqrt{2}}{8}\right)}{5} & \frac{\sqrt{2}}{32} + \frac{1}{16} + \frac{\sqrt{2} \cdot \left(\frac{1}{8} + \frac{3 \sqrt{2}}{8}\right)}{8}\end{matrix}\right]$
+
+We nottice that the second column is filled with negative numbers.
+
+$Z^{1} = f(\hat{A_{S^4}}.Z^{0}. W^{1}) =  \left[\begin{matrix}\frac{3}{320} + \frac{9 \sqrt{2}}{320} + \frac{9 \sqrt{2} \left(\frac{\sqrt{2}}{8} + \frac{1}{4}\right)}{40} & 0 & \frac{1}{40} + \frac{3 \sqrt{2}}{40} + \frac{3 \sqrt{2} \left(\frac{\sqrt{2}}{8} + \frac{1}{4}\right)}{5} & \frac{1}{64} + \frac{3 \sqrt{2}}{64} + \frac{3 \sqrt{2} \left(\frac{\sqrt{2}}{8} + \frac{1}{4}\right)}{8}\\\frac{3 \sqrt{2}}{160} + \frac{3}{80} + \frac{3 \sqrt{2} \cdot \left(\frac{1}{8} + \frac{3 \sqrt{2}}{8}\right)}{40} & 0 & \frac{\sqrt{2}}{20} + \frac{1}{10} + \frac{\sqrt{2} \cdot \left(\frac{1}{8} + \frac{3 \sqrt{2}}{8}\right)}{5} & \frac{\sqrt{2}}{32} + \frac{1}{16} + \frac{\sqrt{2} \cdot \left(\frac{1}{8} + \frac{3 \sqrt{2}}{8}\right)}{8}\\\frac{3 \sqrt{2}}{160} + \frac{3}{80} + \frac{3 \sqrt{2} \cdot \left(\frac{1}{8} + \frac{3 \sqrt{2}}{8}\right)}{40} & 0 & \frac{\sqrt{2}}{20} + \frac{1}{10} + \frac{\sqrt{2} \cdot \left(\frac{1}{8} + \frac{3 \sqrt{2}}{8}\right)}{5} & \frac{\sqrt{2}}{32} + \frac{1}{16} + \frac{\sqrt{2} \cdot \left(\frac{1}{8} + \frac{3 \sqrt{2}}{8}\right)}{8}\\\frac{3 \sqrt{2}}{160} + \frac{3}{80} + \frac{3 \sqrt{2} \cdot \left(\frac{1}{8} + \frac{3 \sqrt{2}}{8}\right)}{40} & 0 & \frac{\sqrt{2}}{20} + \frac{1}{10} + \frac{\sqrt{2} \cdot \left(\frac{1}{8} + \frac{3 \sqrt{2}}{8}\right)}{5} & \frac{\sqrt{2}}{32} + \frac{1}{16} + \frac{\sqrt{2} \cdot \left(\frac{1}{8} + \frac{3 \sqrt{2}}{8}\right)}{8}\end{matrix}\right]$
+$Z^{1}  \approx \begin{bmatrix}
+    0.185 &  0 &  0.493 &  0.308\\
+    0.134 &  0 &  0.356 &  0.223\\
+    0.134 &  0 &  0.356 &  0.223\\
+    0.134 &  0 &  0.356 &  0.223
+\end{bmatrix}$
+
+% \bibliographystyle{plain}
+% \bibliography{references} % citation records are in the references.bib document
 
 \end{document}
