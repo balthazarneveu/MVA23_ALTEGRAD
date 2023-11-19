@@ -442,6 +442,20 @@ $\hat{A_{C^4}}.X.W^{1} = X.W^{1}$
 $Z_{1} = f(\hat{A_{C^4}}.X.W^{1}) = \frac{1}{2} [\frac{3}{10}. 1_{4}, 0, \frac{4}{5} .1_{4}, \frac{1}{2} .1_{4}]$
 
 $Z_{1} = \left[\begin{matrix}\frac{3}{20} & 0 & \frac{2}{5} & \frac{1}{4}\\\frac{3}{20} & 0 & \frac{2}{5} & \frac{1}{4}\\\frac{3}{20} & 0 & \frac{2}{5} & \frac{1}{4}\\\frac{3}{20} & 0 & \frac{2}{5} & \frac{1}{4}\end{matrix}\right]$
+
+\subsection*{Structure}
+\begin{itemize}
+    \item \textbf{Cycle}: In $Z^{1}_{C^{4}}$, we observe that the features are the same for all nodes. It is indeed intuitive since in a cycle,
+all the nodes have the same structure and we initialized with "all ones" identical input features.
+These won't be distinguishable.
+    \item \textbf{Star}: In $Z^{1}_{C^{4}}$, we still nottice that the 3 last rows corresponding to the 3 satellite nodes
+have the same features... again this is expected as they have the same edge structure (related to the central node).
+    \item \textbf{Dead activation}: We note that in both cases, the second feature component (= second column) has been "zeroed". And this came from the first layer, where the second component had been zeroed out due to a negative weight in $W^{0}$.
+    Activation being zero in the first layer, it propagates later. 
+    \item Note that we can't make generalities here like 
+    \textit{one negative coefficient in the weights and you'll propagate dead neurons} 
+    since we do not have biases and also input features are simply identical and set to 1.
+\end{itemize}
 % \bibliographystyle{plain}
 % \bibliography{references} % citation records are in the references.bib document
 
