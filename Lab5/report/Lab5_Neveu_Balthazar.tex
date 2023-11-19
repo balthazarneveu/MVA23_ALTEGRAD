@@ -108,11 +108,19 @@ Notebook is available to reproduce these experiments.
 \end{figure}
 
 \section{Graph Neural Networks}
-\subsection*{Task 11: GNN Classification on karate club - 100\% accuracy}
+\subsection*{Task 11: GNN Classification on karate club - one-hot encoded input features \\ 100\% accuracy}
 \begin{verbatim}
 Epoch: 100 loss_train: 0.0640 acc_train: 1.0000 time: 0.0025s
 \end{verbatim}
 
+\subsection*{Task 12: GNN Classification on karate club - identical input features \\ 66.6\% accuracy}
+Network cannot make a distinction between the input nodes features.
+For instance, it prevents the network from memorizing a mapping between the training node "indexes" and the output class.
+It forces the network to detect inherent similarity.
+
+\begin{verbatim}
+Epoch: 100 loss_train: 0.6528 acc_train: 0.6667 time: 0.0227s
+\end{verbatim}
 \bibliographystyle{plain}
 \bibliography{references} % citation records are in the references.bib document
 
