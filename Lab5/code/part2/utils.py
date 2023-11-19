@@ -7,24 +7,23 @@ import numpy as np
 import torch
 from sklearn.preprocessing import LabelEncoder
 
-def normalize_adjacency(A_no_self_loop):
-    ############## Task 9
+############## Task 9
+def normalize_adjacency(A_no_self_loop: sp.sparray) -> sp.sparray:
+    """Compute normalized adjacency matrix  D^-1/2 . A . D^-1/2
+
+    Args:
+        A_no_self_loop (sp.sparray): Adjacency matrix (extracted from networkX for instance)
+
+    Returns:
+        sp.sparray: Normalized adjacency matrix
+    """
     A = A_no_self_loop + sp.eye(A_no_self_loop.shape[0])
-    D = A.sum(axis=1)
-    inv_d = 1./np.sqrt(D)
+    D = A.sum(axis=1) # degree is the sum over columns
+    # Compute D^-1/2
+    inv_d = 1./np.sqrt(D) 
     D_inv = sp.diags(inv_d)
     A_normalized = D_inv @ A @ D_inv
-    return A_normalized
-
-def normalize_adjacency_TA(A):
-    ############## Task 9 by TA
-    n = A.shape[0]
-    A += sp.eye(n)
-    degs = A.dot(np.ones((n, 1))).flatten()
-    inv_degs = np.power(degs, -1/2)
-    D_inv = sp.diags(inv_degs)
-    # A_normalized = D_inv @ A @ D_inv
-    A_normalized = D_inv.dot(A.dot(D_inv))
+    # Compute D^-1/2 . A  . D^-1/2
     return A_normalized
 
 
