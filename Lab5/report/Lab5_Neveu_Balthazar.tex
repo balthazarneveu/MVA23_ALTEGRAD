@@ -185,9 +185,8 @@ Test set results: loss= 0.0001 accuracy= 1.0000
 \begin{verbatim}
 Epoch: 100 loss_train: 0.6655 acc_train: 0.6667 time: 0.0059s
 Test set results: loss= 0.7871 accuracy= 0.2857
-\end{verbatim}
-    
-Network cannot make a distinction between the input nodes features.
+\end{verbatim}  
+\textbf{Network cannot make a distinction between the input nodes features.}
 
 For instance, it prevents the network from memorizing a mapping between the training node "indexes" and the output class.
 It inherently forces the network to recognize structure patterns from the edges to label the nodes both at training and inference time...
@@ -198,6 +197,26 @@ there could be a chance identical features would allow classifying the 2 groups.
 In the case of on-hot encoded input features, at training time, the network can memorize that some labels correspond
 to a given class and later at inference time, convolution allow to spread this information to unlabelled nodes...
 wich results in far better results.
+
+
+
+\subsection*{Task 13:Supervised GNN Classification on Cora \\ 87.1\% accuracy}
+\begin{verbatim}
+Epoch: 100 loss_train: 0.1436 acc_train: 0.9550 loss_val: 0.4949 acc_val: 0.8745 time: 0.0130s
+Test set results: loss= 0.5189 accuracy= 0.8708
+\end{verbatim}
+
+
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=1.\textwidth]{figures/tSNE_Cora.png}
+    \caption{Visualization of the discriminative features learnt by the GNN (second hidden linear layer). 
+    High dimensional $(32)$ hidden feature vectors of 542 test nodes are visualized in a low 2D dimension space using T-SNE}
+    \label{fig:tsne_cora}
+\end{figure}
+
+\subsection*{Question 4}
+
 
 \bibliographystyle{plain}
 \bibliography{references} % citation records are in the references.bib document

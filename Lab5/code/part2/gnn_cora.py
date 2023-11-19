@@ -46,7 +46,7 @@ idx_val = torch.LongTensor(idx_val).to(device)
 idx_test = torch.LongTensor(idx_test).to(device)
 
 # Creates the model and specifies the optimizer
-model = GNN(features.shape[1], n_hidden_1, n_hidden_2, n_class, dropout_rate).to(device)
+model = GNN(features.shape[1], n_hidden_1, n_hidden_2, n_class, dropout_rate, return_hidden_features=True).to(device)
 optimizer = optim.Adam(model.parameters(), lr=learning_rate)
 
 
@@ -93,7 +93,6 @@ for epoch in range(epochs):
     train(epoch)
 print("Optimization Finished!")
 print("Total time elapsed: {:.4f}s".format(time.time() - t_total))
-print()
 
 # Testing
 embeddings_test = test()
@@ -102,20 +101,15 @@ embeddings_test = test()
 
 ############## Task 13
 # Transforms torch tensor to numpy matrix
-
-##################
-# your code here #
-##################
+embeddings_test = embeddings_test.detach().cpu().numpy()
 
 
 # Projects the emerging representations to two dimensions using t-SNE
-
-##################
-# your code here #
-##################
+tsne_projector = TSNE(n_components=2)
+embeddings_test_2d = tsne_projector.fit_transform(embeddings_test)
 
 
-labels = class_labels[idx_test]
+labels = class_labels[idx_test.detach().cpu().numpy()]
 unique_labels = np.unique(labels)
 
 colors = ['b', 'g', 'r', 'c', 'm', 'y', 'k']
@@ -131,6 +125,8 @@ for i in range(unique_labels.size):
                s=10)
 
 ax.legend(scatterpoints=1)
-fig.suptitle('T-SNE Visualization of the nodes of the test set',fontsize=12)
-fig.set_size_inches(15,9)
+fig.suptitle('T-SNE Visualization of the nodes of the test set', fontsize=12)
+fig.set_size_inches(15, 9)
+plt.grid()
+plt.axis("equal")
 plt.show()
