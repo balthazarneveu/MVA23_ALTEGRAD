@@ -144,11 +144,34 @@ Spectral features give 50\% accuracy in this same regime, meaning they're nearly
 We're looking at the scenario where no self-loops were added to the graph (e.g. if we'd work with the raw adjacency matrix after normalization
 $D^{-\frac{1}{2}} A D^{-\frac{1}{2}}$). This is a bad idea and we'll try to explain why.
 \begin{itemize}
+    \item Without adding the self-loop, you're doing vanilla message passing from neighboring node and forget to consider the node's own feature.
     \item The node's hidden state is solely a function of its neighbors' features.
-    \item The node's own features are not considered directly, potentially losing the unique characteristics of the node itself. This might lead to less effective representations.
+    \item The node's own features are not considered directly, potentially losing the unique characteristics of the node itself. 
+    This might lead to less effective representations.  After a single layer, the feature of a node will simply 
+    be replaced by the smoothed version of neighboring features.
+    \item It seems from the Kipf \& Welling paper \cite{kipf2017semisupervised} that the self loops also bring numerical stability.
+\end{itemize}
+\subsection*{Renormalization trick}
+In \cite{kipf2017semisupervised}, the authors introduced the use of $\hat{A}$ explaining there are good numerical 
+reasons aswell. In the basic formulation, $D^{-\frac{1}{2}} A D^{-\frac{1}{2}}$, it seemed at first sight that most of the normalization had been taken
+care of (basically do not use the adjacency matrix and aggregate by sum but rather something much similar to averageing over neighbors). But there seems to be more.
+
+In practice, I conducted some checks on the clique (complete) graph.
+\begin{itemize}
+    \item For the clique, $D^{-\frac{1}{2}} A D^{-\frac{1}{2}} \propto 1^{|V|, |V|} - I$ . 
+        \subitem This matrix has 1 eigen value equal to 1, the rest are $|V|-1$ negative eigen values. ($-\frac{1}{|V|-1}$)
+        \subitem If we apply several layers of convolution (assume that linear layers are just doing identity), these negative values may lead 
+        to numerical instabilities (oscillations basically).
+    \item For the clique, $\hat{A} \propto 1^{|V|, |V|}$ which is of rank 1, having a single non null eigenvalue (equal to 1 here) and all other eigen values are 0. Having this self loop seems like a good idea.
 \end{itemize}
 
 
+\begin{verbatim}
+# Clique size 8 - Eigen values
+Self loops True: [0.00e+00 1.00e+00 1.892e-33 1.892e-33 5.278e-34 1.2655-33]
+Self loops False: [ 1.         -0.14285714 -0.14285714 -0.14285714 -0.14285714 -0.14285714]
+\end{verbatim}
+\subsection*{Loosing sight of the original feature}
 \subsubsection*{Single layer case}
 \hrule
 
@@ -171,7 +194,6 @@ Putting a mix of message passing from the neighbors and this memorization abilit
 
 
 
-
 \subsubsection*{Two layer case}
 \hrule
 
@@ -180,6 +202,9 @@ For the star graph case
     \item The center node will recover its original feature (as the average over all satellite nodes features which were made identical afterthe first layer).
     \item After the second convolution layer, all satellites nodes have the same feature (broadcast of the central node feature).
 \end{itemize}
+Information seems to go back and forth. This feels like an unstability in this toy example where the locality of the information is not preserved.
+
+
 \subsection*{Task 11: GNN Classification on karate club - one-hot encoded input features \\ 100\% accuracy}
 \begin{verbatim}
 Epoch: 100 loss_train: 0.0016 acc_train: 1.0000 time: 0.0152s
@@ -223,9 +248,12 @@ Test set results: loss= 0.5189 accuracy= 0.8708
 \subsection*{Question 4}
 \subsection*{Methodology}
 
-Rational approach is to use Sympy for the following computations.
+Rational approach is to use Sympy to ease the following computations.
 
-Here's the example for the star graph
+Here's the example for the star graph below.
+
+You can find a short dedicated Notebook 
+\textit{code/part2/symbolic\_question\_4.ipynb}
 
 \begin{verbatim}
 from sympy import symbols, Matrix, sqrt, Rational, latex, evaluate, N, Max
@@ -456,7 +484,7 @@ have the same features... again this is expected as they have the same edge stru
     \textit{one negative coefficient in the weights and you'll propagate dead neurons} 
     since we do not have biases and also input features are simply identical and set to 1.
 \end{itemize}
-% \bibliographystyle{plain}
-% \bibliography{references} % citation records are in the references.bib document
+\bibliographystyle{plain}
+\bibliography{references} % citation records are in the references.bib document
 
 \end{document}
