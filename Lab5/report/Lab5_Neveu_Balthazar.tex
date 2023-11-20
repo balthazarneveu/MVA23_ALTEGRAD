@@ -20,8 +20,8 @@ We're trying to construct meaningful embeddings for a graph made of crawled fren
     \item Number of nodes: 33226 . Each node is a website link.
     \item Number of edges: 354529 . Edges means the presence of hyperlinks between 2 websites.
     \item Dimension of embeddings of Word2Vec: 128
-    \item Random walk length = 20
-    \item At each node, $n_{walks}=10$ will be pre-stored.
+    \item Random walk length $L = 20$
+    \item At each node, $n_{walks}=\gamma=10$ will be pre-stored.
 \end{itemize}
 
 \subsection*{Task 1 \& 2: Details on random walks sampling implementations}
@@ -135,6 +135,51 @@ Spectral features give 50\% accuracy in this same regime, meaning they're nearly
 
 
 
+\subsection*{Question 2}
+\subsubsection*{Deep walk}
+Assume we have a graph $G \in (V, E)$ where $|V|$ denotes the number of nodes (a.k.a vertices). 
+\subsubsection*{Building the training dataset}
+\begin{itemize}
+    \item Building the $\gamma$ walks of length $L$ for each of the $|V|$ nodes costs \textbf{$O(L.\gamma.|V|)$}.
+    \item Note: \textit{Memory footprint  $\propto L.\gamma.|V|$. when we pre-store all random walks indexes at once...
+    Since SkipGram is going to use stochastic gradient descent,
+    we could sample the batches of random walks on the fly to keep a low memory footprint (it does not seem like a total requirement
+    to sample a frozen dataset of random walks except simplicity of the code).}.
+    \item This creates a training corpus of $k.|V|$ sentences of $L$ words each. Each word corresponds to a node index (vocabulary size = $|V|$) \cite{Perozzi_2014}
+\end{itemize}
+
+
+\subsubsection*{Skip gram}
+From the Word2Vec paper \cite{mikolov2013efficient}, the skip-gram complexity is $O(\text{log}(|V|))$ .
+\begin{itemize}
+    \item Building the hidden vector {d} (simple lookup in the $|V|.d$ matrix).
+    \item Central word(node) is predicting $2.w$ words around (order is ignored). $2.w+1\leq L$ (window is smaller than the length of the walks.
+    \item For each of the words in the 
+\end{itemize}
+% , so using one-hot encodings, each word as an input will be represented by $|V|$ components.
+
+Numerical orders of magnitude in the Karate Graph:
+\begin{itemize}
+    \item $|V| = 34$ nodes
+    \item $|E| = 78$ edges
+    \item \textbf{sparsity}  $|E| << |V|^2 = 1156$ (corresponding to a clique, adjacency matrix is definitely sparse).
+    \item $\gamma = 10$ walks at each node.
+    \item $L=20$ (length of the walks).
+    \item $d=128$ is the hidden dimension used in the skip-gram.
+\end{itemize}
+
+
+
+\subsubsection*{Spectral embeddings}
+\begin{itemize}
+\item  Regarding time complexity, the primary factor in spectral embedding is the eigendecomposition of the Laplacian matrix. 
+Typically, this process has a time complexity of $O(|V|^3)$ for a dense matrix of size $|V| \times |V|$.
+where $ |V| $ represents the number of nodes in the graph.
+\item  Worst case scenario is a clique (dense).
+\item But in practice, graphs are sparse and complexity of eigen decomposition can be reduced.
+In the code for instance, 
+we use the \href{https://docs.scipy.org/doc/scipy/reference/generated/scipy.sparse.linalg.eigs.html}{scipy sparse eigen decomposition}.
+\end{itemize}
 \break
 
 \section{Graph Neural Networks}
@@ -171,6 +216,8 @@ In practice, I conducted some checks on the clique (complete) graph.
 Self loops True: [0.00e+00 1.00e+00 1.892e-33 1.892e-33 5.278e-34 1.2655-33]
 Self loops False: [ 1.         -0.14285714 -0.14285714 -0.14285714 -0.14285714 -0.14285714]
 \end{verbatim}
+
+Please refer to \textit{code/part2/self\_loops\_in\_adjacency\_matrix\_question\_3.ipynb} for the code.
 \subsection*{Loosing sight of the original feature}
 \subsubsection*{Single layer case}
 \hrule
