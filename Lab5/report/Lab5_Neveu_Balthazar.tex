@@ -136,8 +136,18 @@ Spectral features give 50\% accuracy in this same regime, meaning they're nearly
 
 
 \subsection*{Question 2}
-\subsubsection*{Deep walk}
 Assume we have a graph $G \in (V, E)$ where $|V|$ denotes the number of nodes (a.k.a vertices). 
+
+For complexity study, we're interested on evaluating how the algorithm scales with the size of the graph... and indeed we'll study complexity regarding the number of nodes $|V|$.
+\begin{itemize}
+    \item \textbf{Skip-gram embeddings}: $O(|V|log_{2}(|V|))$
+    \item \textbf{Spectral embeddings}: $O(|V|^{3})$ \textit{pessimistic bound when we cannot make assumptions on the graph sparsity}.
+\end{itemize}
+
+\break
+
+\subsubsection*{Deep walk}
+
 \subsubsection*{Building the training dataset}
 \begin{itemize}
     \item Building the $\gamma$ walks of length $L$ for each of the $|V|$ nodes costs \textbf{$O(L.\gamma.|V|)$}.
@@ -149,28 +159,69 @@ Assume we have a graph $G \in (V, E)$ where $|V|$ denotes the number of nodes (a
 \end{itemize}
 
 
-\subsubsection*{Skip gram}
-From the Word2Vec paper \cite{mikolov2013efficient}, the skip-gram complexity is $O(\text{log}(|V|))$ .
-\begin{itemize}
-    \item Building the hidden vector {d} (simple lookup in the $|V|.d$ matrix).
-    \item Central word(node) is predicting $2.w$ words around (order is ignored). $2.w+1\leq L$ (window is smaller than the length of the walks.
-    \item For each of the words in the 
-\end{itemize}
-% , so using one-hot encodings, each word as an input will be represented by $|V|$ components.
+\hrule
+\subsubsection*{Skip gram $O(|V|log_{2}(|V|))$}
 
-Numerical orders of magnitude in the Karate Graph:
+In the deep walk use of the skip-gram model designed originally for language, here are the specificities:
 \begin{itemize}
-    \item $|V| = 34$ nodes
-    \item $|E| = 78$ edges
-    \item \textbf{sparsity}  $|E| << |V|^2 = 1156$ (corresponding to a clique, adjacency matrix is definitely sparse).
+    \item Vocabulary size corresponds to the number of nodes $|V|$.
+    \item Central word(node) is predicting a context of $2.w$ words around (order is ignored). 
+    \item $2.w+1\leq L$ (window is smaller than the length of the walks).
+\end{itemize}
+
+I've made the effort to break down complexity to get something less rough $O(|V|.log(|V|))$ (meaning what's the actual rough factor in front of n.log(n)). \\
+
+\hrule
+
+
+From the Word2Vec paper \cite{mikolov2013efficient}, the skip-gram complexity for each word is $O(2.w.(d+ d log_{2}(|V|)))$
+
+Let's have a quick description of the skip-gram model and break down its complexity
+For each window of $2.w+1$ words, center word $v$ needs to predict $2.w$ context words.
+\begin{itemize}
+    \item The input center word $v$ will be mapped to the hidden vector {d} (simple lookup in the $|V|.d$ matrix). This costs {O(d)}.
+    \item In the non optimized version, the hidden vector has to be mapped $2.w$ times to a $|V|$ dimensional vector (1 logit for each element in the vocabulary).
+        \subitem - The matrix of weights is shared for all $2.w$ words (words considered unordered).
+        \subitem - This fully-connected projection matrix is of size $d.|V|$, going from hidden dimension $d$ to logits in dimension $|V|$  
+        \subitem - Then it has to be followed by a Softmax operation over $|V|$ dimensions.
+        \subitem - This would lead to a huge cost per word $v$ of $2.w(d+d.|V|)$.
+    \item in Word2Vec \cite{mikolov2013efficient} section 3.2, the authors make use of the hierarchical softmax which allows
+    to lower complexity from $O(2.w.(d+ d|V|))$ down to $O(2.w.(d+ d log_{2}(|V|)))$ 
+        \subitem - $log_{2}$ comes from using binary trees.
+        \subitem - Please keep in mind that at inference time, we're only interested in the hidden vector and that this heavy computation is only needed during training.
+\end{itemize}
+
+Assume we have $\nu$ epochs (one epoch means processing all $\gamma.|V|$ sentences),
+
+We make a rough assumption that we'll sample a single window of length $2w+1$ along each
+walk of length $L$, \textit{otherwise an extra factor can be considered}. 
+
+Skip gram training total complexity is $O(\gamma.|V|. \nu. 2.w.(d + d.log_{2}(|V|)))$
+
+\hrule
+
+Summing it up, we get a total complexity of
+$$O(\gamma.|V| (L + \nu. 2.w.(d + d.log_{2}(|V|)))$$
+Most of the computation cost in the Skip-Gram training and the complexity is $\propto 2.w.\gamma.\nu . d.|V|.log_{2}(|V|)$ which scales in $O(|V|.log_{2}(|V|))$ with the size of the graph.
+
+Please note that $2.w.\gamma.\nu d.$ are basically users choice/hyper-parameters but they're non negligible factors in practice.
+
+\hrule
+\subsubsection*{Identifying parameters (orders of magnitude) in the Karate Graph}
+\begin{itemize}
+    \item $|V| = 34$ nodes : \textit{This very small graph makes training deepwalk in seconds actually.}
     \item $\gamma = 10$ walks at each node.
     \item $L=20$ (length of the walks).
     \item $d=128$ is the hidden dimension used in the skip-gram.
+    \item $\nu=5$ epochs.
+    \item $w=8$ for the window length used in gensim's Word2Vec implementation.
+    \item $|E| = 78$ edges \textit{sparsity is a nice property to lower down the complexity of spectral embeddings computation}
 \end{itemize}
 
+\textbf{Remark on sparsity}  $|E| << |V|^2 = 1156$ (corresponding to a clique, adjacency matrix is definitely sparse). Having sparse adjacency is useful in the context of spectral embeddings to reduce complexity.
 
 
-\subsubsection*{Spectral embeddings}
+\subsubsection*{Spectral embeddings $O(|V|^{3})$}
 \begin{itemize}
 \item  Regarding time complexity, the primary factor in spectral embedding is the eigendecomposition of the Laplacian matrix. 
 Typically, this process has a time complexity of $O(|V|^3)$ for a dense matrix of size $|V| \times |V|$.

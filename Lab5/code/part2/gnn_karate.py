@@ -29,8 +29,8 @@ def train_and_classify(edges_path, labels_path, identical_input_features=False):
     # Loads the karate network
     # @TODO: reuse graph loader from part 1
     G = nx.read_weighted_edgelist(edges_path, delimiter=' ', nodetype=int, create_using=nx.Graph())
-    print(G.number_of_nodes())
-    print(G.number_of_edges())
+    print("Number of nodes:", G.number_of_nodes())
+    print("Number of edges:", G.number_of_edges())
 
     n = G.number_of_nodes()
 
