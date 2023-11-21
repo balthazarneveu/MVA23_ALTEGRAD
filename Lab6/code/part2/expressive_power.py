@@ -24,44 +24,48 @@ readout = 'mean'
 dataset = [nx.cycle_graph(n) for n in range(10, 20)]
 
 
-############## Task 5
-        
+# Task 5
+adj_matrices = [nx.adjacency_matrix(gr) for gr in dataset]
+adj_block_diag = sp.block_diag(adj_matrices)
+
+x = np.ones(adj_block_diag.shape[0])  # Features
+# idx = []
+# for id, gr in enumerate(dataset):
+#     idx += [id]*gr.number_of_nodes()
+
+idx = [np.ones(gr.number_of_nodes(), dtype=np.int32)*id for id, gr in enumerate(dataset)]
+idx = np.concatenate(idx)
+
+idx = torch.LongTensor(idx)
+x = torch.FloatTensor(x)
+adj_block_diag = sparse_mx_to_torch_sparse_tensor(adj_block_diag)
+print(idx)
+# print(x.shape)
+
+
+# Task 8
+
 ##################
 # your code here #
 ##################
 
 
+# Task 9
 
-
-############## Task 8
-        
 ##################
 # your code here #
 ##################
 
 
+# Task 10
 
-
-############## Task 9
-        
 ##################
 # your code here #
 ##################
 
 
+# Task 11
 
-
-############## Task 10
-        
-##################
-# your code here #
-##################
-
-
-
-
-############## Task 11
-        
 ##################
 # your code here #
 ##################
