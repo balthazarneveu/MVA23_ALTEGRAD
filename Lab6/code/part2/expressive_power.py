@@ -20,14 +20,8 @@ dropout = 0.0
 neighbor_aggr = 'mean'
 readout = 'mean'
 
-
-############## Task 4
-        
-##################
-# your code here #
-##################
-
-
+# Task 4
+dataset = [nx.cycle_graph(n) for n in range(10, 20)]
 
 
 ############## Task 5
