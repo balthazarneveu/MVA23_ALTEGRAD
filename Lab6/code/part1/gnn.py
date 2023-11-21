@@ -44,40 +44,35 @@ loss_function = nn.CrossEntropyLoss()
 for epoch in range(epochs):
     t = time.time()
     model.train()
-    
     train_loss = 0
     correct = 0
     count = 0
-    adj_batch = list()
-    idx_batch = list()
-    y_batch = list()
 
-    for i in range(0, N_train, batch_size):
-        # TA correction
-        for j in range(i, min(N_train, i+batch_size)):
-            n = G_train[j].number_of_nodes()
-            adj_batch.append(nx.adjacency_matrix(G_train[j])+sp.identity(n))
-            idx_batch.extend([j-i]*n)
-            y_batch.append(y_train)
-
-        adj_batch = sp.block_diag(adj_batch)
-        features_batch = np.ones((adj_batch.shape[0], 1))
-        adj_batch = sparse_mx_to_torch_sparse_tensor(adj_batch).to(device)
-        features_batch = torch.FloatTensor(features_batch).to(device)
-        idx_batch = torch.LongTensor(idx_batch).to(device)
-        y_batch = torch.LongTensor(y_batch).to(device)
-        # ACCURACY SHALL GO TO 90% , loss = 0.3
-
-
-        ####### My code started
-        # adj_batch = list()
-        # y_batch = y_train[i*batch_size:(i+1)*batch_size]
-        # current_graphs = G_train[i*batch_size:(i+1)*batch_size]
-        # total_nodes = [g.number_of_nodes() for g in current_graphs]
-        # idx_batch = [[i]*total_node for total_node in total_nodes]
-         
-
+    for start_index in range(0, N_train, batch_size):
+        # Task 3
+        end_index = min(start_index+batch_size, N_train-1)
         
+        # Compute adjacency matrix of the batch of size N
+        # = big a bigger graph with N connected components.
+        current_graphs = G_train[start_index:end_index]  # Batch of graph elements
+        adj_batch = [nx.adjacency_matrix(gr) for gr in current_graphs]
+        adj_batch = sp.block_diag(adj_batch)
+        adj_batch += sp.eye(adj_batch.shape[0])
+        adj_batch = sparse_mx_to_torch_sparse_tensor(adj_batch).to(device)
+
+        # Input features (stacked for all nodes of the batches of the graph)
+        features_batch = torch.ones((adj_batch.shape[0], 1)).to(device)
+
+        # Indexes used for the readout layer
+        # Note: Used to retrieve which components of the big batched graph
+        # correspond to which original batch component.
+        n_nodes = [g.number_of_nodes() for g in current_graphs]  # Number of nodes in each element of the batch
+        idx_batch = [idx*torch.ones(total_node, dtype=torch.long) for idx, total_node in enumerate(n_nodes)]
+        idx_batch = torch.cat(idx_batch).to(device)
+        
+        # Labels
+        y_batch = torch.LongTensor(y_train[start_index:end_index]).to(device)
+
         optimizer.zero_grad()
         output = model(features_batch, adj_batch, idx_batch)
         loss = loss_function(output, y_batch)
@@ -87,14 +82,14 @@ for epoch in range(epochs):
         correct += torch.sum(preds.eq(y_batch).double())
         loss.backward()
         optimizer.step()
-    
+
     if epoch % 10 == 0:
         print('Epoch: {:04d}'.format(epoch+1),
               'loss_train: {:.4f}'.format(train_loss / count),
-              'acc_train: {:.4f}'.format(correct / count),
+              'acc_train: {:.2%}'.format(correct / count),
               'time: {:.4f}s'.format(time.time() - t))
-        
 print('Optimization finished!')
+# ACCURACY SHALL GO TO 90% , loss = 0.3
 
 # Evaluates the model
 model.eval()
