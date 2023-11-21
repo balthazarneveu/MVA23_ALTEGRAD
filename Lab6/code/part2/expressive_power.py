@@ -21,6 +21,7 @@ neighbor_aggr = 'mean'
 readout = 'mean'
 
 # Task 4
+# Sample 10 cycle graphs of size n= 10, ..., 19
 dataset = [nx.cycle_graph(n) for n in range(10, 20)]
 
 
@@ -29,10 +30,6 @@ adj_matrices = [nx.adjacency_matrix(gr) for gr in dataset]
 adj_block_diag = sp.block_diag(adj_matrices)
 
 x = np.ones(adj_block_diag.shape[0])  # Features
-# idx = []
-# for id, gr in enumerate(dataset):
-#     idx += [id]*gr.number_of_nodes()
-
 idx = [np.ones(gr.number_of_nodes(), dtype=np.int32)*id for id, gr in enumerate(dataset)]
 idx = np.concatenate(idx)
 
