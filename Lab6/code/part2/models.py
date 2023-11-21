@@ -39,17 +39,17 @@ class GNN(nn.Module):
         self.relu = nn.ReLU()
 
     def forward(self, x, adj, idx):
-        
+
         # Task 7
         x = self.relu(self.mp1(x, adj))
         x = self.dropout(x)
         x = self.relu(self.mp2(x, adj))
         x = self.dropout(x)
-        
+
         if self.readout == 'sum':
             idx = idx.unsqueeze(1).repeat(1, x.size(1))
             out = torch.zeros(int(torch.max(idx))+1, x.size(1), device=x.device)
-            out = out.scatter_add_(0, idx, x) 
+            out = out.scatter_add_(0, idx, x)
         elif self.readout == 'mean':
             idx = idx.unsqueeze(1).repeat(1, x.size(1))
             out = torch.zeros(int(torch.max(idx))+1, x.size(1), device=x.device)
@@ -57,11 +57,7 @@ class GNN(nn.Module):
             count = torch.zeros(int(torch.max(idx))+1, x.size(1), device=x.device)
             count = count.scatter_add_(0, idx, torch.ones_like(x, device=x.device))
             out = torch.div(out, count)
-            
-        ############## Task 7
-    
-        ##################
-        # your code here #
-        ##################
-        
+
+        # Task 7
+        out = self.fc(out)
         return out
