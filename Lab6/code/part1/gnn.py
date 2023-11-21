@@ -68,15 +68,15 @@ for epoch in range(epochs):
         y_batch = torch.LongTensor(y_batch).to(device)
         # ACCURACY SHALL GO TO 90% , loss = 0.3
 
-        adj_batch = list()
-        idx_batch = list()
-        y_batch = list()
 
-        ############## Task 3
-        
-        ##################
-        # your code here #
-        ##################
+        ####### My code started
+        # adj_batch = list()
+        # y_batch = y_train[i*batch_size:(i+1)*batch_size]
+        # current_graphs = G_train[i*batch_size:(i+1)*batch_size]
+        # total_nodes = [g.number_of_nodes() for g in current_graphs]
+        # idx_batch = [[i]*total_node for total_node in total_nodes]
+         
+
         
         optimizer.zero_grad()
         output = model(features_batch, adj_batch, idx_batch)

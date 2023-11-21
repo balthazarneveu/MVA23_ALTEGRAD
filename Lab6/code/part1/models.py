@@ -41,7 +41,8 @@ class GNN(nn.Module):
             torch.Tensor: [N] logits after softmax
         """
 
-        adj = adj_no_loops+torch.eye(x_in.shape[0], device=x_in.device)
+        # adj = adj_no_loops+torch.eye(x_in.shape[0], device=x_in.device)
+        adj = adj_no_loops
         # 2 GCN layers
         z0 = self.relu(torch.mm(adj, self.fc1(x_in)))
         z1 = self.relu(torch.mm(adj, self.fc2(z0)))
