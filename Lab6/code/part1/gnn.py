@@ -48,7 +48,26 @@ for epoch in range(epochs):
     train_loss = 0
     correct = 0
     count = 0
+    adj_batch = list()
+    idx_batch = list()
+    y_batch = list()
+
     for i in range(0, N_train, batch_size):
+        # TA correction
+        for j in range(i, min(N_train, i+batch_size)):
+            n = G_train[j].number_of_nodes()
+            adj_batch.append(nx.adjacency_matrix(G_train[j])+sp.identity(n))
+            idx_batch.extend([j-i]*n)
+            y_batch.append(y_train)
+
+        adj_batch = sp.block_diag(adj_batch)
+        features_batch = np.ones((adj_batch.shape[0], 1))
+        adj_batch = sparse_mx_to_torch_sparse_tensor(adj_batch).to(device)
+        features_batch = torch.FloatTensor(features_batch).to(device)
+        idx_batch = torch.LongTensor(idx_batch).to(device)
+        y_batch = torch.LongTensor(y_batch).to(device)
+        # ACCURACY SHALL GO TO 90% , loss = 0.3
+
         adj_batch = list()
         idx_batch = list()
         y_batch = list()
