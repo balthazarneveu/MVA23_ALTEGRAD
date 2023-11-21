@@ -36,19 +36,16 @@ x = np.ones(adj_block_diag.shape[0])  # Features
 idx = [np.ones(gr.number_of_nodes(), dtype=np.int32)*id for id, gr in enumerate(dataset)]
 idx = np.concatenate(idx)
 
-idx = torch.LongTensor(idx)
-x = torch.FloatTensor(x)
-adj_block_diag = sparse_mx_to_torch_sparse_tensor(adj_block_diag)
+idx = torch.LongTensor(idx).to(device)
+x = torch.FloatTensor(x).to(device)
+adj_block_diag = sparse_mx_to_torch_sparse_tensor(adj_block_diag).to(device)
 print(idx)
 # print(x.shape)
 
 
 # Task 8
-
-##################
-# your code here #
-##################
-
+model = GNN(1, hidden_dim, output_dim, neighbor_aggr, readout, dropout).to(device)
+print(model(x, adj_block_diag, idx))
 
 # Task 9
 
