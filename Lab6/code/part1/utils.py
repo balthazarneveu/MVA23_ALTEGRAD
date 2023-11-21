@@ -8,13 +8,23 @@ import torch
 from random import randint
 from typing import Tuple, List
 
+
 # Task 1
-
-
 def create_dataset(
     num_graph: int = 50,
     probabilities: List[float] = [0.2, 0.4]
 ) -> Tuple[List[nx.Graph], List[int]]:
+    """Samples a dataset of Erdos-Rényi random graphs with various probabilities (corresponding to classes).
+    Args:
+        num_graph (int, optional): amount of graphs to sample in each class. Defaults to 50.
+        probabilities (List[float], optional): Probability p of connecting 2 nodes.
+        Defaults to [0.2, 0.4].
+    Returns:
+        Tuple[List[nx.Graph], List[int]]: Graphs, Labels
+        We are studying a classification task here:
+        Label 0 is assigned to the graphs of proability 0.2
+        Label 1 is assigned to the graphs of proability 0.4
+    """
     graph_list = list()
     labels_list = list()
     for label, p in enumerate(probabilities):
@@ -33,5 +43,6 @@ def sparse_mx_to_torch_sparse_tensor(sparse_mx):
     return torch.sparse_coo_tensor(indices, values, shape)
 
 
-Gs, y = create_dataset()
-print(Gs[0])
+if __name__ == "__main__":
+    gs_list, y = create_dataset()
+    print(gs_list[0])
