@@ -15,7 +15,6 @@ class MessagePassing(nn.Module):
         self.fc2 = nn.Linear(input_dim, output_dim)
 
     def forward(self, x, adj):
-        
         # Task 6
         x_node = self.fc1(x)
         x_nbrs = self.fc2(x)
@@ -41,21 +40,21 @@ class GNN(nn.Module):
 
     def forward(self, x, adj, idx):
         
-        ############## Task 7
-    
-        ##################
-        # your code here #
-        ##################
+        # Task 7
+        x = self.relu(self.mp1(x, adj))
+        x = self.dropout(x)
+        x = self.relu(self.mp2(x, adj))
+        x = self.dropout(x)
         
         if self.readout == 'sum':
             idx = idx.unsqueeze(1).repeat(1, x.size(1))
-            out = torch.zeros(torch.max(idx)+1, x.size(1), device=x.device)
+            out = torch.zeros(int(torch.max(idx))+1, x.size(1), device=x.device)
             out = out.scatter_add_(0, idx, x) 
         elif self.readout == 'mean':
             idx = idx.unsqueeze(1).repeat(1, x.size(1))
-            out = torch.zeros(torch.max(idx)+1, x.size(1), device=x.device)
+            out = torch.zeros(int(torch.max(idx))+1, x.size(1), device=x.device)
             out = out.scatter_add_(0, idx, x)
-            count = torch.zeros(torch.max(idx)+1, x.size(1), device=x.device)
+            count = torch.zeros(int(torch.max(idx))+1, x.size(1), device=x.device)
             count = count.scatter_add_(0, idx, torch.ones_like(x, device=x.device))
             out = torch.div(out, count)
             
