@@ -16,20 +16,17 @@ class MessagePassing(nn.Module):
 
     def forward(self, x, adj):
         
-        ############## Task 6
-    
-        ##################
-        # your code here #
-        ##################
-        
+        # Task 6
+        x_node = self.fc1(x)
+        x_nbrs = self.fc2(x)
+        m = torch.mm(adj, x_nbrs)
+        assert self.neighbor_aggr in ['sum', 'mean']
         if self.neighbor_aggr == 'sum':
             output = x_node + m
         elif self.neighbor_aggr == 'mean':
-            deg = torch.spmm(adj, torch.ones(x.size(0),1, device=x.device))
+            deg = torch.spmm(adj, torch.ones(x.size(0), 1, device=x.device))
             output = x_node + torch.div(m, deg)
-            
         return output
-
 
 
 class GNN(nn.Module):
