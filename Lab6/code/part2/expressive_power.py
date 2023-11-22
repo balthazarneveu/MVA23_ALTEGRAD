@@ -86,12 +86,38 @@ print("These are the same although the graphs were different!")
 
 
 # Question 4
+# EXAMPLE 1
+# ----------------
+# G1 = C5 U C7
+G1 = nx.union(nx.cycle_graph(5), nx.cycle_graph(7), rename=('C5-', 'C7-'))
+# Requires renaming the 2 C3 graphs to avoid node naming conflicts
+
+# G2 = C12
+G2 = nx.cycle_graph(12)
+
+# EXAMPLE 2
+# ----------------
+# Naive extention of task 11
 # G1 = C4 U C4
 G1 = nx.union(nx.cycle_graph(4), nx.cycle_graph(4), rename=('S1-', 'S2-'))
 # Requires renaming the 2 C3 graphs to avoid node naming conflicts
-
 # G2 = C8
 G2 = nx.cycle_graph(8)
+
+
+# EXAMPLE 3
+# ----------------
+# Naive extention of task 11
+# G1 = C3 U C3  U C3 U C3
+G1 = nx.union(nx.cycle_graph(3), nx.cycle_graph(3), rename=('S1-', 'S2-'))
+G1 = nx.union(G1, nx.cycle_graph(4), rename=('S1--', 'S3-'))
+G1 = nx.union(G1, nx.cycle_graph(4), rename=('S1---', 'S4-'))
+
+# G2 = C12
+G2 = nx.cycle_graph(12)
+
+
+
 
 plot = True
 if plot:
