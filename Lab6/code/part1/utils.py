@@ -32,10 +32,11 @@ def create_dataset(
             n = randint(10, 20)
             graph_list.append(nx.fast_gnp_random_graph(n, p=p))
             labels_list.append(label)
+    # Note: no need to shuffle, sklearn train_test_split will do the shuffling
     return graph_list, labels_list
 
 
-def sparse_mx_to_torch_sparse_tensor(sparse_mx):
+def sparse_mx_to_torch_sparse_tensor(sparse_mx) -> torch.Tensor:
     sparse_mx = sparse_mx.tocoo().astype(np.float32)
     indices = torch.from_numpy(np.vstack((sparse_mx.row, sparse_mx.col)).astype(np.int64))
     values = torch.from_numpy(sparse_mx.data)

@@ -10,7 +10,7 @@ from sklearn.model_selection import train_test_split
 import torch
 import torch.nn as nn
 from torch import optim
-
+from typing import Tuple, List
 from models import GNN
 from utils import create_dataset, sparse_mx_to_torch_sparse_tensor
 
@@ -29,7 +29,7 @@ learning_rate = 0.01
 Gs, y = create_dataset()
 n_class = np.unique(y).size
 
-# Splits the dataset into a training and a test set
+# Splits the dataset into a training and a test set - Shuffle
 G_train, G_test, y_train, y_test = train_test_split(Gs, y, test_size=0.1)
 
 N_train = len(G_train)
@@ -39,6 +39,36 @@ N_test = len(G_test)
 model = GNN(1, n_hidden_1, n_hidden_2, n_hidden_3, n_class).to(device)
 optimizer = optim.Adam(model.parameters(), lr=learning_rate)
 loss_function = nn.CrossEntropyLoss()
+
+
+def get_batch(
+    graph_list: List[nx.Graph],
+    labels: List[int],
+    start_index: int,
+    end_index: int
+) -> Tuple[torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor]:
+    current_graphs = graph_list[start_index:end_index]  # Batch of graph elements
+    # Compute adjacency matrix of the batch of size N
+    # = big a bigger graph with N connected components.
+    adj_batch = [nx.adjacency_matrix(gr) for gr in current_graphs]
+    adj_batch = sp.block_diag(adj_batch)
+    adj_batch += sp.eye(adj_batch.shape[0]) # Add the self loop to the adjacency matrix.
+    adj_batch = sparse_mx_to_torch_sparse_tensor(adj_batch).to(device)
+
+    # Input features (stacked for all nodes of the batches of the graph)
+    features_batch = torch.ones((adj_batch.shape[0], 1), dtype=torch.float).to(device)
+
+    # Indexes used for the readout layer
+    # Note: Used to retrieve which components of the big batched graph
+    # correspond to which original batch component.
+    n_nodes = [g.number_of_nodes() for g in current_graphs]  # Number of nodes in each element of the batch
+    idx_batch = [idx*torch.ones(total_node, dtype=torch.long) for idx, total_node in enumerate(n_nodes)]
+    idx_batch = torch.cat(idx_batch).to(device)
+
+    # Labels
+    labels_batch = torch.LongTensor(labels[start_index:end_index]).to(device)
+    return features_batch, adj_batch, idx_batch, labels_batch
+
 
 # Trains the model
 for epoch in range(epochs):
@@ -51,28 +81,7 @@ for epoch in range(epochs):
     for start_index in range(0, N_train, batch_size):
         # Task 3
         end_index = min(start_index+batch_size, N_train-1)
-        
-        # Compute adjacency matrix of the batch of size N
-        # = big a bigger graph with N connected components.
-        current_graphs = G_train[start_index:end_index]  # Batch of graph elements
-        adj_batch = [nx.adjacency_matrix(gr) for gr in current_graphs]
-        adj_batch = sp.block_diag(adj_batch)
-        adj_batch += sp.eye(adj_batch.shape[0])
-        adj_batch = sparse_mx_to_torch_sparse_tensor(adj_batch).to(device)
-
-        # Input features (stacked for all nodes of the batches of the graph)
-        features_batch = torch.ones((adj_batch.shape[0], 1)).to(device)
-
-        # Indexes used for the readout layer
-        # Note: Used to retrieve which components of the big batched graph
-        # correspond to which original batch component.
-        n_nodes = [g.number_of_nodes() for g in current_graphs]  # Number of nodes in each element of the batch
-        idx_batch = [idx*torch.ones(total_node, dtype=torch.long) for idx, total_node in enumerate(n_nodes)]
-        idx_batch = torch.cat(idx_batch).to(device)
-        
-        # Labels
-        y_batch = torch.LongTensor(y_train[start_index:end_index]).to(device)
-
+        features_batch, adj_batch, idx_batch, y_batch = get_batch(G_train, y_train, start_index, end_index)
         optimizer.zero_grad()
         output = model(features_batch, adj_batch, idx_batch)
         loss = loss_function(output, y_batch)
@@ -96,17 +105,10 @@ model.eval()
 test_loss = 0
 correct = 0
 count = 0
-for i in range(0, N_test, batch_size):
-    adj_batch = list()
-    idx_batch = list()
-    y_batch = list()
-
-    ############## Task 3
-    
-    ##################
-    # your code here #
-    ##################
-
+for start_index in range(0, N_test, batch_size):
+    # Task 3
+    end_index = min(start_index+batch_size, N_test-1)
+    features_batch, adj_batch, idx_batch, y_batch = get_batch(G_test, y_test, start_index, end_index)
     output = model(features_batch, adj_batch, idx_batch)
     loss = loss_function(output, y_batch)
     test_loss += loss.item() * output.size(0)
@@ -115,5 +117,5 @@ for i in range(0, N_test, batch_size):
     correct += torch.sum(preds.eq(y_batch).double())
 
 print('loss_test: {:.4f}'.format(test_loss / count),
-      'acc_test: {:.4f}'.format(correct / count),
+      'acc_test: {:.2%}'.format(correct / count),
       'time: {:.4f}s'.format(time.time() - t))
