@@ -153,8 +153,39 @@ Now we nottice that $G^{1} = C^3 \cup C^3$ (2 connected components $C^3$). The r
 ending up with $z^{1}_{C^6} = 2. z^{1}_{C^3}$.
 So this was expected.
 
-
+\break
 \subsection*{Question 4}
+Example 1 and 2 are similar to the trick used in task 11 although they're different.
+
+\subsubsection*{Example 0}
+$G^1$ is a square with 4 nodes, $G^2$ is made 2 connected components made of pairs (path of 2 nodes $P^2$) so no cycle involved in one of them 
+\begin{itemize}
+    \item $G^1 =C^4$ as shown in \ref{fig:c4}
+    \item $G^2 =P^2 \cup P^2$ shown in \ref{fig:2k2}
+\end{itemize} 
+are not isomorphic but their GNN representations are the same.
+
+\begin{verbatim}
+G1 representation: [-2.7711809  2.5115702  2.4466345  2.0798717]
+G2 representation: [-2.7711809  2.5115702  2.4466345  2.0798717]
+\end{verbatim}
+
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=0.6\textwidth]{figures/c4.png}
+    \caption{$G^1 =C^4$}
+    \label{fig:c4}
+\end{figure}
+
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=0.6\textwidth]{figures/2k2.png}
+    \caption{$G^2 =P^2 \cup P^2$}
+    \label{fig:2k2}
+\end{figure}
+
+\break
+
 \subsubsection*{Example 1}
 \begin{itemize}
     \item $G^1 =C^5 \cup C^7$ shown in \ref{fig:c5_u_c7}
@@ -180,7 +211,7 @@ are not isomorphic but their GNN representation are the same.
     \caption{$G^2 =C^{12}$}
     \label{fig:c12}
 \end{figure}
-
+\break
 \subsubsection*{Example 2}
 $G^1 =C^4 \cup C^4$ shown in \ref{fig:c4_u_c4} and $G^2 =C^8$ shown in \ref{fig:c8} are not isomorphic but their GNN representation are the same.
 \begin{figure}[ht]
