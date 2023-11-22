@@ -83,3 +83,27 @@ print(f"G1 representation: {out_representation[0, :]}")
 print(f"G2 representation: {out_representation[1, :]}")
 print("These are the same although the graphs were different!")
 # G1 and G2 end up with the same representation.
+
+
+# Question 4
+# G1 = C4 U C4
+G1 = nx.union(nx.cycle_graph(4), nx.cycle_graph(4), rename=('S1-', 'S2-'))
+# Requires renaming the 2 C3 graphs to avoid node naming conflicts
+
+# G2 = C8
+G2 = nx.cycle_graph(8)
+
+plot = True
+if plot:
+    nx.draw_networkx(G1)
+    plt.show()
+    nx.draw_networkx(G2)
+    plt.show()
+with torch.no_grad():
+    model = GNN(input_dim, hidden_dim, output_dim, MP_SUM, READOUT_SUM, dropout).to(device)
+    out_representation = model(x, adj_block_diag, idx)
+out_representation = out_representation.detach().cpu().numpy()
+print(f"G1 representation: {out_representation[0, :]}")
+print(f"G2 representation: {out_representation[1, :]}")
+print("These are the same although the graphs were different!")
+# G1 and G2 end up with the same representation.

@@ -107,8 +107,8 @@ Let's break things down.
     \item most importantly, $\forall{n} > 2$ the rows of $Z{0}$ are even the same no matter the length of the cycle graph.
     \item The same reasoning goes for $Z^{1}$, let's define $z^{1}$ a single row of $Z^{1}$.
     \item Readout:
-        \subitem  \textbf{Sum readout($Z^1$)}: sum over all the rows which are equal. We end up with $n*z^{1}$
-        \subitem  \textbf{Average readout($Z^1$)}: average over all the rows which are equal. We end up with a single row of $Z^{1}$, no matter the length $n$
+        \subitem  \textbf{Sum readout($Z^1$)}: sum over all the rows which are equal. We end up with $n*u$
+        \subitem  \textbf{Average readout($Z^1$)}: average over all the rows which are equal. We end up with a single row of $u$, no matter the length $n$
 \end{itemize}
 Below is a quick numerical validation of the proportionality in $n$ for the sum readout.
 
@@ -147,7 +147,34 @@ neighbor_aggr='sum', readout='sum'
 G1 representation: [-2.1668684  4.630975  -3.4005415  1.7028651]
 G2 representation: [-2.1668684  4.630975  -3.4005415  1.7028651]
 \end{verbatim}
-Same representation.
+Same representation although the graphs are different (not isomorphic!).
+We note that $G^2 =C^6$ being a cycle graph, we shown in question 3 that it will have a representation $z^{1}_{C^6} = 2 z^{1}_{C^3}$..
+Now we nottice that $G^{1} = C^3 \cup C^3$ (2 connected components $C^3$). The readout will sum the features of these 2 graphs,
+ending up with $z^{1}_{C^6} = 2. z^{1}_{C^3}$.
+So this was expected.
+
+
+\subsection*{Question 4}
+$G^1 =C^4 \cup C^4$ and $G^2 =C^8$ are not isomorphic but their GNN representation are the same.
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=0.6\textwidth]{figures/C4_u_C4.png}
+    \caption{$G^1 =C^4 \cup C^4$}
+    \label{fig:c4_u_c4}
+\end{figure}
+
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=0.6\textwidth]{figures/C8.png}
+    \caption{$G^2 =C^8$}
+    \label{fig:c8}
+\end{figure}
+
+\begin{verbatim}
+G1 representation: [-0.3330682 -1.2836217  4.3689184  2.9682496]
+G2 representation: [-0.3330682 -1.2836217  4.3689184  2.9682496]
+These are the same although the graphs are not isomorphic    
+\end{verbatim}
 % \bibliographystyle{plain}
 % \bibliography{references}
 
