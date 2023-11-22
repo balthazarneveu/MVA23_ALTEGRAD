@@ -12,7 +12,7 @@
 More info:
 \href{https://github.com/balthazarneveu/MVA23_ALTEGRAD/#readme}{MVA ALTEGRAD Balthazar Neveu on Github}
 
-\section{Section 1}
+\section{Section 1: Graph-level classification}
 \subsection*{Question 1: $\mathbb{E}(d)^{p=0.2} = 4.8$ and $\mathbb{E}(d)^{p=0.4} = 9.6$}
 We denote a graph $G = (V, E)$ where $v_i \in V$ denote the vertices or nodes and $E$ are the edges.
 \subsubsection*{Preliminary remark : Overall statistics of edges}
@@ -40,6 +40,34 @@ to get a connected 1 edge)}
 $$\mathbb{E}(d)^{p=0.2} = 24*0.2 = 4.8$$
 $$\mathbb{E}(d)^{p=0.4} = 24*0.4 = 9.6$$
 
+\subsection*{Question 2: Readout operator}
+Readout functions shall reduce the graph's "spatial dimension" (they're the equivalent for graph to global pooling operation for image and signal processing).
+Therefore, there are a certain amount of guideline for the readout operators:
+\begin{itemize}
+    \item permutation invariant
+    \item size agnostic
+\end{itemize} 
+Fully connected layers do not like good "Readout" functions.
+
+The weight matrix of a fully connected layer is fixed, so the number of nodes is fixed.
+
+Assume for a minute you'd train a fully connected layer to replace the readout function. If you trained it on $G_1, G_2, G_3$ which have a different sizes number of nodes,
+you could use a weight matrix of size determined by the graph which most nodes ($G_2$ has $|V_{G_2}|=4$ nodes here).
+Weight matrix would have a fixed size $(|V_{G_2}|*h_{\text{in}}, h_{\text{out}} )$ and you'd have to pad the input vectors with zeros when there are not enough nodes.
+
+This simply feels wrong: we could assume you'd pad with zeros if a new test graph has more nodes or remove some nodes when there are less nodes.
+
+Last but not least, a fully connected layer is not permutation invariant (shuffle input features of a linear layer and you get a different result).
+
+\textit{Closing remark:}
+The case where it would make sense is for instance if the graph nodes are always ordered the same way, basically meaning that there's an underlying geometric structure.
+
+One could think of MRI connectivity between areas of the brain where the nodes are always localized at the same spatial location using an atlas of "standardized areas" like the Harvard-Oxford brain atlas.
+Brain MRI seem to be standardized this way and this introduces hard constraints in the nature of the data.
+
+
+It seems like such readout is not such a bad idea for some special graph-level problems (drug discovery mentioned \href{https://github.com/davidbuterez/gnn-neural-readouts}{Neural readouts} this is an active area of research.)
+
 \subsection*{Task 3}
 \begin{verbatim}
 Epoch: 0191 loss_train: 0.3165 acc_train: 85.39% time: 0.0434s
@@ -47,6 +75,8 @@ Optimization finished!
 loss_test: 0.2615 acc_test: 88.89% time: 0.0466s
 \end{verbatim}
 
+
+\section*{Section 2: Graph Neural Networks expressiveness}
 % \bibliographystyle{plain}
 % \bibliography{references}
 
