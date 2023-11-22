@@ -23,10 +23,12 @@ class MessagePassing(nn.Module):
         """Message passing followed by readout (=pooling over graph)
         - with a "fully connected" fc1 projection for central nodes
         - with a different fc2 projection for neighbour nodes
-
+        Warning:
+        - There are no non linearities here.
+        - Adjacency matrix is not expected to contain self loops (do no input A+I)
         Args:
             x (torch.Tensor): flattened batch input features [sum over N |v_i|, input_dim]
-            adj (torch.Tensor): adjacency
+            adj (torch.Tensor): batched adjacency matrix without self loops
 
         Returns:
             torch.Tensor: N, ouput
@@ -46,7 +48,8 @@ class MessagePassing(nn.Module):
 
 
 class GNN(nn.Module):
-    def __init__(self, input_dim, hidden_dim, output_dim, neighbor_aggr: str, readout: str, dropout: float):
+    def __init__(
+            self, input_dim: int, hidden_dim: int, output_dim: int, neighbor_aggr: str, readout: str, dropout: float):
         super(GNN, self).__init__()
         self.readout = readout
         assert neighbor_aggr in [MP_SUM, MP_MEAN], f"wrong neighborhood aggregation mode {neighbor_aggr}"
@@ -57,8 +60,7 @@ class GNN(nn.Module):
         self.dropout = nn.Dropout(dropout)
         self.relu = nn.ReLU()
 
-    def forward(self, x, adj, idx):
-
+    def forward(self, x: torch.Tensor, adj: torch.Tensor, idx: torch.Tensor):
         # Task 7
         x = self.relu(self.mp1(x, adj))
         x = self.dropout(x)
