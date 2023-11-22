@@ -23,7 +23,9 @@ readout = 'mean'
 # Task 4
 # Sample 10 cycle graphs of size n= 10, ..., 19
 dataset = [nx.cycle_graph(n) for n in range(10, 20)]
-
+# Concatenating all graphs into a big batched matrix
+# will result in 10+11+12+..+19 = 145 nodes where there are 10 connected components
+# Batch Adjacency matrix will be of size 145x145
 
 # Task 5
 adj_matrices = [nx.adjacency_matrix(gr) for gr in dataset]
@@ -36,8 +38,6 @@ idx = np.concatenate(idx)
 idx = torch.LongTensor(idx).to(device)
 x = torch.FloatTensor(x).to(device)
 adj_block_diag = sparse_mx_to_torch_sparse_tensor(adj_block_diag).to(device)
-print(idx)
-# print(x.shape)
 
 
 # Task 8
