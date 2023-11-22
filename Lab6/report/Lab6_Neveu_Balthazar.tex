@@ -13,8 +13,41 @@ More info:
 \href{https://github.com/balthazarneveu/MVA23_ALTEGRAD/#readme}{MVA ALTEGRAD Balthazar Neveu on Github}
 
 \section{Section 1}
+\subsection*{Question 1: $\mathbb{E}(d)^{p=0.2} = 4.8$ and $\mathbb{E}(d)^{p=0.4} = 9.6$}
+We denote a graph $G = (V, E)$ where $v_i \in V$ denote the vertices or nodes and $E$ are the edges.
+\subsubsection*{Preliminary remark : Overall statistics of edges}
 
-\bibliographystyle{plain}
-\bibliography{references} % citation records are in the references.bib document
+The total number of undirected edges when the graph is dense is ${n\choose 2} =\frac{n(n-1)}{2}$
+When $n=25$, the densest graph will have 300 edges (when $p=1$).
+The Erdős–Rényi has in average $p * {n=25 \choose 2}$ edges.
+
+\subsubsection*{Distribution of the degree $d$}
+For a given node $v{i}$, the probability to be connected to $v_j$ where $i \neq j$ is a
+Bernoulli distribution.
+$$\mathbb{P}[(v_{i},v_{j}) \in E] \sim \mathbb{B}(p)$$ 
+Degree of edge $v_{i}$ is the number of all connected nodes (number of edges).
+It therefore follows a Binomial distribution. 
+The maximum number of edges is $n-1$ ($d \leq n-1$)
+The expectation of the degree $d$ is:
+$$\mathbb{E}(d) = (n-1).p$$
+
+\textit{Note: Computing the degree is equivalent to counting the number of flipped coins with a tail (1 toss of a coin with probability $p$ of having a tail is equivalent 
+to get a connected 1 edge)}
+
+\textit{Note: Obviously, degenerate case when $p=1$, the degree reaches the maximum as we'd expect.}
+
+\subsubsection*{Numerical application}
+$$\mathbb{E}(d)^{p=0.2} = 24*0.2 = 4.8$$
+$$\mathbb{E}(d)^{p=0.4} = 24*0.4 = 9.6$$
+
+\subsection*{Task 3}
+\begin{verbatim}
+Epoch: 0191 loss_train: 0.3165 acc_train: 85.39% time: 0.0434s
+Optimization finished!
+loss_test: 0.2615 acc_test: 88.89% time: 0.0466s
+\end{verbatim}
+
+% \bibliographystyle{plain}
+% \bibliography{references}
 
 \end{document}
