@@ -84,39 +84,54 @@ print(f"G2 representation: {out_representation[1, :]}")
 print("These are the same although the graphs were different!")
 # G1 and G2 end up with the same representation.
 
-
 # Question 4
+example = 0
+# EXAMPLE 0
+# ----------------
+if example == 0:
+    # An example without cycles
+    G1 = nx.cycle_graph(4)
+
+    G2 = nx.Graph()
+
+    # Adding nodes
+    G2.add_nodes_from(range(4))
+
+    # Adding edges to form two separate pairs (0-1 and 2-3)
+    G2.add_edges_from([(0, 1), (2, 3)])
+
 # EXAMPLE 1
 # ----------------
-# G1 = C5 U C7
-G1 = nx.union(nx.cycle_graph(5), nx.cycle_graph(7), rename=('C5-', 'C7-'))
-# Requires renaming the 2 C3 graphs to avoid node naming conflicts
+if example == 1:
+    # G1 = C5 U C7
+    G1 = nx.union(nx.cycle_graph(5), nx.cycle_graph(7), rename=('C5-', 'C7-'))
+    # Requires renaming the 2 C3 graphs to avoid node naming conflicts
 
-# G2 = C12
-G2 = nx.cycle_graph(12)
+    # G2 = C12
+    G2 = nx.cycle_graph(12)
 
 # EXAMPLE 2
 # ----------------
-# Naive extention of task 11
-# G1 = C4 U C4
-G1 = nx.union(nx.cycle_graph(4), nx.cycle_graph(4), rename=('S1-', 'S2-'))
-# Requires renaming the 2 C3 graphs to avoid node naming conflicts
-# G2 = C8
-G2 = nx.cycle_graph(8)
+if example == 2:
+    # Naive extention of task 11
+    # G1 = C4 U C4
+    G1 = nx.union(nx.cycle_graph(4), nx.cycle_graph(4), rename=('S1-', 'S2-'))
+    # Requires renaming the 2 C3 graphs to avoid node naming conflicts
+    # G2 = C8
+    G2 = nx.cycle_graph(8)
 
 
 # EXAMPLE 3
 # ----------------
-# Naive extention of task 11
-# G1 = C3 U C3  U C3 U C3
-G1 = nx.union(nx.cycle_graph(3), nx.cycle_graph(3), rename=('S1-', 'S2-'))
-G1 = nx.union(G1, nx.cycle_graph(4), rename=('S1--', 'S3-'))
-G1 = nx.union(G1, nx.cycle_graph(4), rename=('S1---', 'S4-'))
+if example == 3:
+    # Naive extention of task 11
+    # G1 = C3 U C3  U C3 U C3
+    G1 = nx.union(nx.cycle_graph(3), nx.cycle_graph(3), rename=('S1-', 'S2-'))
+    G1 = nx.union(G1, nx.cycle_graph(4), rename=('S1--', 'S3-'))
+    G1 = nx.union(G1, nx.cycle_graph(4), rename=('S1---', 'S4-'))
 
-# G2 = C12
-G2 = nx.cycle_graph(12)
-
-
+    # G2 = C12
+    G2 = nx.cycle_graph(12)
 
 
 plot = True
