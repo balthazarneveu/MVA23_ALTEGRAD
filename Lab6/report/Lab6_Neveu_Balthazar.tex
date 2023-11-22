@@ -77,6 +77,70 @@ loss_test: 0.2615 acc_test: 88.89% time: 0.0466s
 
 
 \section*{Section 2: Graph Neural Networks expressiveness}
+\section*{Question 3: influence of readout and aggregation functions while discriminating Cycle graphs with GNN}
+In the following, $n > 2$ denotes the number of nodes in the cycle graph $C_{n}$.
+\begin{itemize}
+    \item \textit{neighbor aggregation = mean},\textbf{readout= mean: same features} (same graph description $\forall{n}$)
+    \item \textit{neighbor aggregation = sum}, \textbf{readout= mean: same features} (same graph description $\forall{n}$)
+    \item \textit{neighbor aggregation = mean, readout= sum}: different features
+    \item \textit{neighbor aggregation = sum, readout= sum}: different features
+\end{itemize}
+
+
+
+Using the mean readout gives similar characteristics describing all the different cycle graphs.
+The expressiveness of the GNN increases with the sum readout which leads to different representation when $n$ varies.
+Using the mean or sum in neighbor aggregation does not change anything in the resulting representation (simply a scaling factor). We cannot make generalities
+
+An handwavy explanation is that the sum in the readout allows "counting" features (here the underlying count refers to the number of nodes).
+
+Let's break things down.
+
+\begin{itemize}
+    \item $X$ input are all ones.
+    \item In the message passing, $MP(A, X)$ 
+        \subitem - projected inputs features will be mapped to the same vectors $X.W_{0}$ has all equal rows.
+        \subitem - since all nodes in a cycle graph have 2 neighbors
+        \subitem - sum aggregation: $A.(X.W_{0}) = 2(X.W_{0}$) in this special case... will also have all equal rows.
+        \subitem - mean aggregation: $D^{-1}.A.(X.W_{0}) = (X.W_{0}$) will also have all equal rows.
+        \subitem - by extension $Z^{0} = ReLu(MP(A, X))$ has equal rows for the sum or mean aggregation
+    \item most importantly, $\forall{n} > 2$ the rows of $Z{0}$ are even the same no matter the length of the cycle graph.
+    \item The same reasoning goes for $Z^{1}$, let's define $z^{1}$ a single row of $Z^{1}$.
+    \item Readout:
+        \subitem  \textbf{Sum readout($Z^1$)}: sum over all the rows which are equal. We end up with $n*z^{1}$
+        \subitem  \textbf{Average readout($Z^1$)}: average over all the rows which are equal. We end up with a single row of $Z^{1}$, no matter the length $n$
+\end{itemize}
+Below is a quick numerical validation of the proportionality in $n$ for the sum readout.
+
+\break
+
+We remark the proportionality property for the sum Readout.($Z^{1}_{G} \propto{n}$)
+
+
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=0.6\textwidth]{figures/features_evolution.png}
+    \caption{Evolution of graph descriptors using the sum readout. We can validate the linear evolution in $n$ }
+    \label{fig:node_embeddings}
+\end{figure}
+
+
+\begin{verbatim}
+neighbor_aggr='sum', readout='sum'
+[
+    [ 4.146614    5.709204    0.09333157  4.6471424 ]
+    [ 4.5737143   6.290244    0.09161585  5.1209064 ]
+    [ 5.000814    6.8712826   0.08990037  5.594671  ]
+    [ 5.4279146   7.452322    0.08818489  6.068435  ]
+    [ 5.8550153   8.033361    0.08646905  6.542199  ]
+    [ 6.282116    8.614401    0.08475303  7.015964  ]
+    [ 6.709216    9.195441    0.08303796  7.4897275 ]
+    [ 7.1363163   9.77648     0.08132147  7.963493  ]
+    [ 7.563416   10.357518    0.07960581  8.437258  ]
+    [ 7.9905176  10.938558    0.07789027  8.911022  ]
+]      
+\end{verbatim}
+
 % \bibliographystyle{plain}
 % \bibliography{references}
 
