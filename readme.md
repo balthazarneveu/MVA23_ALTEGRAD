@@ -4,6 +4,7 @@
 - [Lab 3](Lab3_Neveu_Balthazar.pdf) : Transfer Learning for sentiment analyzis using a pretrained Transformer for language modeling using next word prediction 
 - [Lab 4](Lab4_Neveu_Balthazar.pdf) : Learning how to use a few frameworks (Fairseq, Hugging face) - Fine tune LLM with LoRA + quantization
 - [Lab 5](Lab5_Neveu_Balthazar.pdf) : Unsupervised Deepwalk and spectral embeddings for weakly supervised classification, GNN basics for supervised classification
+- [Lab 6](Lab6_Neveu_Balthazar.pdf) : GNN for graph level tasks and graph expressiveness.
 
 
 # TensorDock
