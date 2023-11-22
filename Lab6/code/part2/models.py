@@ -65,7 +65,6 @@ class GNN(nn.Module):
         x = self.relu(self.mp1(x, adj))
         x = self.dropout(x)
         x = self.relu(self.mp2(x, adj))
-        x = self.dropout(x)
 
         if self.readout == READOUT_SUM:
             idx = idx.unsqueeze(1).repeat(1, x.size(1))
