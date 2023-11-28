@@ -37,10 +37,12 @@ class Decoder(nn.Module):
 
     def forward(self, x):
         # Task 10
-
-        ##################
-        # your code here #
-        ##################
+        for i in range(self.n_layers):
+            x = self.fc[i](x)
+        x = self.fc_proj(x)
+        adj = x.reshape(-1, self.n_nodes, self.n_nodes)
+        adj = 0.5*(adj + adj.transpose(1, 2))
+        # sigmoid will be added in the loss function
 
         return adj
 
