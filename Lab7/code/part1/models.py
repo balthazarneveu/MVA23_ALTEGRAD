@@ -5,6 +5,7 @@ Learning on Sets and Graph Generative Models - ALTEGRAD - Nov 2023
 import torch
 import torch.nn as nn
 
+
 class DeepSets(nn.Module):
     def __init__(self, input_dim, embedding_dim, hidden_dim):
         super(DeepSets, self).__init__()
@@ -14,13 +15,12 @@ class DeepSets(nn.Module):
         self.tanh = nn.Tanh()
 
     def forward(self, x):
-        
-        ############## Task 3
-    
-        ##################
-        # your code here #
-        ##################
-        
+        # Task 3
+        x = self.embedding(x)
+        x = self.tanh(self.fc1(x))
+        x = torch.sum(x, dim=1)
+        x = self.fc2(x)
+
         return x.squeeze()
 
 
@@ -33,11 +33,10 @@ class LSTM(nn.Module):
         self.fc = nn.Linear(hidden_dim, 1)
 
     def forward(self, x):
-        
-        ############## Task 4
-    
-        ##################
-        # your code here #
-        ##################
-        
+
+        # Task 4
+        x = self.embedding(x)
+        _, (x, _) = self.lstm(x)
+        x = self.fc(x)  # extract all hiddent states
+
         return x.squeeze()
