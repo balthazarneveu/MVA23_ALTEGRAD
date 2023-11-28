@@ -3,7 +3,7 @@ Learning on Sets and Graph Generative Models - ALTEGRAD - Nov 2023
 """
 
 import numpy as np
-from typing import Tuple
+from typing import Tuple, List
 
 
 def create_train_dataset(n_train: int = 100000, max_train_card: int = 10) -> Tuple[np.ndarray, np.ndarray]:
@@ -40,7 +40,7 @@ def create_train_dataset_unicity() -> Tuple[np.ndarray, np.ndarray]:
     return X_train, y_train
 
 
-def create_test_dataset(n_test=200000) -> Tuple[np.ndarray, np.ndarray]:
+def create_test_dataset(n_test=200000) -> Tuple[List[np.ndarray], List[np.ndarray]]:
     # Task 2
     min_test_card = 5
     max_test_card = 101

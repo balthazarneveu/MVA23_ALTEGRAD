@@ -9,6 +9,8 @@ import torch.nn.functional as F
 from torch_geometric.nn import global_add_pool
 
 # Decoder
+
+
 class Decoder(nn.Module):
     def __init__(self, latent_dim, hidden_dim, n_layers, n_nodes, dropout=0.2):
         super(Decoder, self).__init__()
@@ -16,66 +18,67 @@ class Decoder(nn.Module):
         self.n_nodes = n_nodes
 
         self.fc = nn.ModuleList()
-        self.fc.append(nn.Sequential(nn.Linear(latent_dim, hidden_dim),  
-                            nn.ReLU(),
-                            nn.LayerNorm(hidden_dim), 
-                            nn.Dropout(dropout)
-                            ))
+        self.fc.append(nn.Sequential(nn.Linear(latent_dim, hidden_dim),
+                                     nn.ReLU(),
+                                     nn.LayerNorm(hidden_dim),
+                                     nn.Dropout(dropout)
+                                     ))
 
         for i in range(1, n_layers):
-            self.fc.append(nn.Sequential(nn.Linear(hidden_dim*i, hidden_dim*(i+1)),  
-                            nn.ReLU(),
-                            nn.LayerNorm(hidden_dim*(i+1)), 
-                            nn.Dropout(dropout)
-                            ))
-        
+            self.fc.append(nn.Sequential(nn.Linear(hidden_dim*i, hidden_dim*(i+1)),
+                                         nn.ReLU(),
+                                         nn.LayerNorm(hidden_dim*(i+1)),
+                                         nn.Dropout(dropout)
+                                         ))
+
         self.fc_proj = nn.Linear(hidden_dim*n_layers, n_nodes*n_nodes)
         self.dropout = nn.Dropout(dropout)
         self.relu = nn.ReLU()
-    
+
     def forward(self, x):
-        ############## Task 10
-    
+        # Task 10
+
         ##################
         # your code here #
         ##################
-        
+
         return adj
 
 # Encoder
+
+
 class Encoder(nn.Module):
     def __init__(self, input_dim, hidden_dim, latent_dim, n_layers, dropout=0.2):
         super(Encoder, self).__init__()
-        self.n_layers = n_layers        
+        self.n_layers = n_layers
         self.mlps = torch.nn.ModuleList()
-        self.mlps.append(nn.Sequential(nn.Linear(input_dim, hidden_dim),  
-                            nn.ReLU(),
-                            nn.Linear(hidden_dim, hidden_dim), 
-                            nn.ReLU()
-                            ))
+        self.mlps.append(nn.Sequential(nn.Linear(input_dim, hidden_dim),
+                                       nn.ReLU(),
+                                       nn.Linear(hidden_dim, hidden_dim),
+                                       nn.ReLU()
+                                       ))
 
         for layer in range(n_layers-1):
-            self.mlps.append(nn.Sequential(nn.Linear(hidden_dim, hidden_dim),  
-                            nn.ReLU(),
-                            nn.Linear(hidden_dim, hidden_dim), 
-                            nn.ReLU()
-                            ))
+            self.mlps.append(nn.Sequential(nn.Linear(hidden_dim, hidden_dim),
+                                           nn.ReLU(),
+                                           nn.Linear(hidden_dim, hidden_dim),
+                                           nn.ReLU()
+                                           ))
 
         self.fc = nn.Linear(hidden_dim, hidden_dim)
         self.relu = nn.ReLU()
 
     def forward(self, adj, x, idx):
-        ############## Task 8
-    
-        ##################
-        # your code here #
-        ##################
-
+        # Task 8
+        # implement H(1) and H(2)
+        for i in range(self.n_layers):
+            x = adj @ x
+            x = self.mlps[i](x)
         # Readout
         idx = idx.unsqueeze(1).repeat(1, x.size(1))
         out = torch.zeros(torch.max(idx)+1, x.size(1), device=x.device, requires_grad=False)
         out = out.scatter_add_(0, idx, x)
-        
+
         out = self.fc(out)
         return out
 
@@ -89,7 +92,7 @@ class VariationalAutoEncoder(nn.Module):
         self.encoder = Encoder(input_dim, hidden_dim_enc, hidden_dim_enc, n_layers_enc)
         self.fc_mu = nn.Linear(hidden_dim_enc, latent_dim)
         self.fc_logvar = nn.Linear(hidden_dim_enc, latent_dim)
-        self.decoder = Decoder(latent_dim, hidden_dim_dec, n_layers_dec, n_max_nodes) 
+        self.decoder = Decoder(latent_dim, hidden_dim_dec, n_layers_dec, n_max_nodes)
 
     def reparameterize(self, mu, logvar, eps_scale=1.):
         if self.training:
@@ -106,18 +109,22 @@ class VariationalAutoEncoder(nn.Module):
         return adj
 
     def loss_function(self, adj, x, idx, y, beta=0.05):
-        x_g  = self.encoder(adj, x, idx)
-        
-        ############## Task 9
-    
-        mu = # your code here
-        logvar = # your code here
-        
+        x_g = self.encoder(adj, x, idx)
+
+        # Task 9
+
+        mu = self.fc_mu(x_g)
+        logvar = self.fc_logvar(x_g)
+
         x_g = self.reparameterize(mu, logvar)
         adj = self.decoder(x_g)
-        
+
         triu_idx = torch.triu_indices(self.n_max_nodes, self.n_max_nodes)
-        recon = F.binary_cross_entropy_with_logits(adj[:,triu_idx[0,:],triu_idx[1,:]], y[:,triu_idx[0,:],triu_idx[1,:]], reduction='sum', pos_weight=torch.tensor(1./0.4))
+        recon = F.binary_cross_entropy_with_logits(
+            adj[:, triu_idx[0, :], triu_idx[1, :]], y[:, triu_idx[0, :], triu_idx[1, :]],
+            reduction='sum',
+            pos_weight=torch.tensor(1./0.4)
+        )
         kld = -0.5 * torch.sum(1 + logvar - mu.pow(2) - logvar.exp())
         loss = recon + beta*kld
 
