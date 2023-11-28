@@ -12,6 +12,7 @@ from scipy.io import loadmat
 
 import torch
 import torch.nn.functional as F
+from pathlib import Path
 
 from model import VariationalAutoEncoder
 from utils import normalize_adjacency, sparse_mx_to_torch_sparse, find_communities_and_plot
@@ -32,7 +33,8 @@ max_nodes = 40
 input_feats = 2
 
 # Load dataset
-adj_dict = loadmat("../data/sbm.mat")
+pth = Path(__file__).parent.parent/"data"/"sbm.mat"
+adj_dict = loadmat(str(pth))
 adj = [adj_dict['G'+str(i)] for i in range(1000)]
 n_graphs = len(adj)
 
@@ -43,9 +45,9 @@ adj_normalized = [normalize_adjacency(adj[i]) for i in range(len(adj))]
 x = list()
 for i in range(len(adj)):
     n = adj[i].shape[0]
-    v = np.zeros((n,2))
-    v[:,0] = adj[i].dot(np.ones(n))/max_nodes
-    v[:,1] = adj[i].dot(v[:,0])/max_nodes
+    v = np.zeros((n, 2))
+    v[:, 0] = adj[i].dot(np.ones(n))/max_nodes
+    v[:, 1] = adj[i].dot(v[:, 0])/max_nodes
     x.append(v)
 
 # Slit into training and validation sets
@@ -57,7 +59,8 @@ n_train = len(train_idx)
 n_val = len(val_idx)
 
 # Initialize autoencoder
-autoencoder = VariationalAutoEncoder(input_feats, hidden_dim_encoder, hidden_dim_decoder, latent_dim, n_layers_encoder, n_layers_decoder, max_nodes).to(device)
+autoencoder = VariationalAutoEncoder(input_feats, hidden_dim_encoder, hidden_dim_decoder,
+                                     latent_dim, n_layers_encoder, n_layers_decoder, max_nodes).to(device)
 optimizer = torch.optim.Adam(autoencoder.parameters(), lr=0.001)
 
 # Train autoencoder
@@ -81,8 +84,9 @@ for epoch in range(1, epochs+1):
             adj_batch.append(adj_normalized[train_idx[j]])
             x_batch.append(x[train_idx[j]])
             idx_batch += [j-i]*n
-            y_batch.append(np.expand_dims(np.pad(adj[train_idx[j]].todense(), ((0,max_nodes-n),(0,max_nodes-n))), axis=0))
-        
+            y_batch.append(np.expand_dims(np.pad(adj[train_idx[j]].todense(),
+                           ((0, max_nodes-n), (0, max_nodes-n))), axis=0))
+
         adj_batch = sp.block_diag(adj_batch)
         x_batch = np.vstack(x_batch)
         y_batch = np.vstack(y_batch)
@@ -91,9 +95,9 @@ for epoch in range(1, epochs+1):
         x_batch = torch.FloatTensor(x_batch).to(device)
         idx_batch = torch.LongTensor(idx_batch).to(device)
         y_batch = torch.FloatTensor(y_batch).to(device)
-        
+
         optimizer.zero_grad()
-        loss, recon, kld  = autoencoder.loss_function(adj_batch, x_batch, idx_batch, y_batch)
+        loss, recon, kld = autoencoder.loss_function(adj_batch, x_batch, idx_batch, y_batch)
         train_loss_all_recon += recon.item()
         train_loss_all_kld += kld.item()
         loss.backward()
@@ -117,8 +121,9 @@ for epoch in range(1, epochs+1):
             adj_batch.append(adj_normalized[val_idx[j]])
             x_batch.append(x[val_idx[j]])
             idx_batch += [j-i]*n
-            y_batch.append(np.expand_dims(np.pad(adj[val_idx[j]].todense(), ((0,max_nodes-n),(0,max_nodes-n))), axis=0))
-        
+            y_batch.append(np.expand_dims(np.pad(adj[val_idx[j]].todense(),
+                           ((0, max_nodes-n), (0, max_nodes-n))), axis=0))
+
         adj_batch = sp.block_diag(adj_batch)
         x_batch = np.vstack(x_batch)
         y_batch = np.vstack(y_batch)
@@ -128,28 +133,29 @@ for epoch in range(1, epochs+1):
         idx_batch = torch.LongTensor(idx_batch).to(device)
         y_batch = torch.FloatTensor(y_batch).to(device)
 
-        loss, recon, kld  = autoencoder.loss_function(adj_batch, x_batch, idx_batch, y_batch)
+        loss, recon, kld = autoencoder.loss_function(adj_batch, x_batch, idx_batch, y_batch)
         val_loss_all_recon += recon.item()
         val_loss_all_kld += kld.item()
         val_loss_all += loss.item()
         val_count += torch.max(idx_batch)+1
 
     if epoch % 5 == 0:
-        print('Epoch: {:04d}, Train Loss: {:.5f}, Train Reconstruction Loss: {:.2f}, Train KLD Loss: {:.2f}, Val Loss: {:.5f}, Val Reconstruction Loss: {:.2f}, Val KLD Loss: {:.2f}'.format(epoch, train_loss_all/train_count, train_loss_all_recon/train_count, train_loss_all_kld/train_count, val_loss_all/val_count, val_loss_all_recon/val_count, val_loss_all_kld/val_count))
-        
+        print('Epoch: {:04d}, Train Loss: {:.5f}, Train Reconstruction Loss: {:.2f}, Train KLD Loss: {:.2f}, Val Loss: {:.5f}, Val Reconstruction Loss: {:.2f}, Val KLD Loss: {:.2f}'.format(
+            epoch, train_loss_all/train_count, train_loss_all_recon/train_count, train_loss_all_kld/train_count, val_loss_all/val_count, val_loss_all_recon/val_count, val_loss_all_kld/val_count))
+
 autoencoder.eval()
 
 
-############## Task 11
-z = # your code here #
-adj = # your code here #
+# Task 11
+z = torch.randn(1, latent_dim)
+adj = autoencoder.decoder(z)
 
 
 # Create and visualize graphs
 for i in range(adj.size(0)):
-    A = adj[i,:,:].detach().cpu().numpy()
-    A[A>=0.5] = 1
-    A[A<0.5] = 0
+    A = adj[i, :, :].detach().cpu().numpy()
+    A[A >= 0.5] = 1
+    A[A < 0.5] = 0
     G = nx.from_numpy_array(A)
     to_remove = list()
     for node in G.nodes():

@@ -78,7 +78,7 @@ class Encoder(nn.Module):
             x = self.mlps[i](x)
         # Readout
         idx = idx.unsqueeze(1).repeat(1, x.size(1))
-        out = torch.zeros(torch.max(idx)+1, x.size(1), device=x.device, requires_grad=False)
+        out = torch.zeros(int(torch.max(idx))+1, x.size(1), device=x.device, requires_grad=False)
         out = out.scatter_add_(0, idx, x)
 
         out = self.fc(out)
