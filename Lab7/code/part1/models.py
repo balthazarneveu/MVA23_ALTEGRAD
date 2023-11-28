@@ -33,7 +33,6 @@ class LSTM(nn.Module):
         self.fc = nn.Linear(hidden_dim, 1)
 
     def forward(self, x):
-
         # Task 4
         x = self.embedding(x)
         _, (x, _) = self.lstm(x)
