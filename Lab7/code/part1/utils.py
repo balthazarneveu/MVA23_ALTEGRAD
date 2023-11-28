@@ -6,13 +6,14 @@ import numpy as np
 from typing import Tuple
 
 
-def create_train_dataset(n_train: int = 100000, max_train_card: int = 10):  # -> Tuple[np.ndarray, np.ndarray]:
+def create_train_dataset(n_train: int = 100000, max_train_card: int = 10) -> Tuple[np.ndarray, np.ndarray]:
+    # Task 1
     X_train = np.zeros((n_train, max_train_card))
-    y_train = np.zeros((n_train))
+    y_train = np.zeros(n_train)
     for i in range(n_train):
         card = np.random.randint(1, max_train_card+1)
         X_train[i, -card:] = np.random.randint(1, max_train_card+1, size=card)
-        y_train = np.sum(X_train[i, :])
+        y_train[i] = np.sum(X_train[i, :])
     return X_train, y_train
 
 

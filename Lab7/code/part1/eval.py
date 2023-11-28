@@ -39,38 +39,37 @@ lstm.load_state_dict(checkpoint['state_dict'])
 lstm.eval()
 
 # Dict to store the results
-results = {'deepsets': {'acc':[], 'mae':[]}, 'lstm': {'acc':[], 'mae':[]}}
+results = {'deepsets': {'acc': [], 'mae': []}, 'lstm': {'acc': [], 'mae': []}}
 
 for i in range(len(cards)):
     y_pred_deepsets = list()
     y_pred_lstm = list()
     for j in range(0, n_samples_per_card, batch_size):
-        
-        ############## Task 6
-    
-        ##################
-        # your code here #
-        ##################
-        
+        # Task 6
+        x_batch = torch.Tensor(X_test[i][j:min(j+batch_size, n_samples_per_card), :]).to(device)
+        x_batch = torch.LongTensor(x_batch).to(device)
+
     y_pred_deepsets = torch.cat(y_pred_deepsets)
     y_pred_deepsets = y_pred_deepsets.detach().cpu().numpy()
-    
-    acc_deepsets = #your code here
-    mae_deepsets = #your code here
+
+    acc_deepsets = accuracy_score(y_test[i], y_pred_deepsets)
+    mae_deepsets = y_pred_deepsets.detach().cpu().numpy()
+
     results['deepsets']['acc'].append(acc_deepsets)
     results['deepsets']['mae'].append(mae_deepsets)
-    
+
+    # Task 6
     y_pred_lstm = torch.cat(y_pred_lstm)
     y_pred_lstm = y_pred_lstm.detach().cpu().numpy()
-    
-    acc_lstm = #your code here
-    mae_lstm = #your code here
+
+    acc_lstm = accuracy_score(y_test[i], y_pred_lstm)
+    mae_lstm = mean_absolute_error(y_test[i], y_pred_lstm)
     results['lstm']['acc'].append(acc_lstm)
     results['lstm']['mae'].append(mae_lstm)
 
 
-############## Task 7
-    
+# Task 7
+
 ##################
 # your code here #
 ##################
