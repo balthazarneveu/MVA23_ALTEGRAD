@@ -84,8 +84,9 @@ for epoch in range(1, epochs+1):
             adj_batch.append(adj_normalized[train_idx[j]])
             x_batch.append(x[train_idx[j]])
             idx_batch += [j-i]*n
-            y_batch.append(np.expand_dims(np.pad(adj[train_idx[j]].todense(),
-                           ((0, max_nodes-n), (0, max_nodes-n))), axis=0))
+            y_batch.append(np.expand_dims(
+                np.pad(adj[train_idx[j]].todense(),
+                       ((0, max_nodes-n), (0, max_nodes-n))), axis=0))
 
         adj_batch = sp.block_diag(adj_batch)
         x_batch = np.vstack(x_batch)
@@ -144,10 +145,9 @@ for epoch in range(1, epochs+1):
             epoch, train_loss_all/train_count, train_loss_all_recon/train_count, train_loss_all_kld/train_count, val_loss_all/val_count, val_loss_all_recon/val_count, val_loss_all_kld/val_count))
 
 autoencoder.eval()
-
-
+autoencoder.cpu()
 # Task 11
-z = torch.randn(1, latent_dim)
+z = torch.randn(5, latent_dim)
 adj = autoencoder.decoder(z)
 
 
@@ -162,4 +162,8 @@ for i in range(adj.size(0)):
         if G.degree(node) == 0:
             to_remove.append(node)
     G.remove_nodes_from(to_remove)
-    find_communities_and_plot(G)
+    find_communities_and_plot(
+        G,
+        save_path=Path(__file__).parent.parent.parent/"report"/"figures",
+        fig_name=f"graph_{i:02d}"
+    )
