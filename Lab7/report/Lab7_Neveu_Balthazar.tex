@@ -16,10 +16,32 @@ More info:
 \section*{Question 1 : LSTM are not permutation invariant, therefore not recommended for sets processing}
 Permutation invariance refers to the property where the model's output does not change if the order of the input data is changed. For instance, in a permutation invariant model, the input sequence [1, 2, 3] would yield the same output as [3, 2, 1]. Permuation invaraiance is a desirable property to deal with sets.
 \newline
-Long Short-Term Memory (LSTM) models are not permutation invariant. LSTM process sequential data in a recurrent fashion and maintain a kind of memory. Order matters for natural language processing or time series but not for sets.
+Long Short-Term Memory (LSTM) models are not permutation invariant. LSTM process sequential data in a recurrent fashion and maintain a kind of memory. Order matters for natural language processing or time series but not for sets. 
 
 LSTM are therefore not suited for sets processing.
-We confirm this with the visualization from task 7.
+\newline
+
+
+
+We confirm this with the figure \ref{fig:performances_deepset_lstm_evolution} from task 7.
+Please note that this figure may be a bit misleading  as the results of deepSet look almost too good to be true (100\% accuracy), which is why I also report the accuracies of Deepset and LSTM while training \ref{fig:performances_deepset_lstm_evolution}.
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=1.\textwidth]{figures/deep_set_performances.png}
+    \caption{Comparison of accuracies of the prediction of the sum over a set of integers with regard to the cardinality of the set. Deepset is able to generalize while LSTM fails (only rougly correct when summing 10 digits, in the regime it was trained).}
+    \label{fig:performances_deepset_lstm}
+\end{figure}
+
+
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=1.\textwidth]{figures/deep_set_performances_evol.png}
+    \caption{Evolution of the accuracies regarding cardinality during training}
+    \label{fig:performances_deepset_lstm_evolution}
+\end{figure}
+
 
 % \bibliographystyle{plain}
 % \bibliography{references}
