@@ -12,7 +12,14 @@
 More info:
 \href{https://github.com/balthazarneveu/MVA23_ALTEGRAD/#readme}{MVA ALTEGRAD Balthazar Neveu on Github}
 
-\section{Section 1}
+\section*{DeepSets: Learn to add \textit{(add to learn...)}}
+\section*{Question 1 : LSTM are not permutation invariant, therefore not recommended for sets processing}
+Permutation invariance refers to the property where the model's output does not change if the order of the input data is changed. For instance, in a permutation invariant model, the input sequence [1, 2, 3] would yield the same output as [3, 2, 1]. Permuation invaraiance is a desirable property to deal with sets.
+\newline
+Long Short-Term Memory (LSTM) models are not permutation invariant. LSTM process sequential data in a recurrent fashion and maintain a kind of memory. Order matters for natural language processing or time series but not for sets.
+
+LSTM are therefore not suited for sets processing.
+We confirm this with the visualization from task 7.
 
 % \bibliographystyle{plain}
 % \bibliography{references}
