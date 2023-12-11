@@ -51,7 +51,7 @@ def create_train_dataset(
     for idx in range(n_train):
         card = np.random.randint(1, max_train_card+1)
         if multiset:  # Multiset code
-            X_train[idx, -card:] = np.random.randint(1, max_train_card+1, size=card)
+            X_train[idx, -card:] = np.random.randint(1, 10+1, size=card)
         else:  # Ensure sample unicity
             sample = np.random.randint(1, 11, max_train_card)
             sample_set = set(sample)
@@ -92,7 +92,8 @@ def create_test_dataset(n_test=200000) -> Tuple[List[np.ndarray], List[np.ndarra
     max_test_card = 101
     step_test_card = 5
     cards = range(min_test_card, max_test_card, step_test_card)
-    n_samples_per_card = n_test // len(cards)
+    # [5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 85, 90, 95, 100]
+    n_samples_per_card = n_test // len(cards)  # 10000
 
     X_test = []
     y_test = []
