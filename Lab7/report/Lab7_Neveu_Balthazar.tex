@@ -76,13 +76,48 @@ Processing a set using DeepSet or a GNN with a degenerate edgeless graph constru
 
 Finally, DeepSet is a permutation invariant architecture. It is not suited for graph-level tasks where structure matters.
 
+\break
 
-\section*{Question 3 : }
+\section*{Question 3 : stochastic block model (SBM)}
+\subsection*{Stochastic Block Model with $r=2$ communities/blocks}
+Edge probability matrix $ P \in {[0, 1]}^{2\times 2}$ is a symmetric matrix.
+\[ P = \begin{pmatrix} p_{\text{in}} &  p_{\text{out}} \\ p_{\text{out}} &  p_{\text{in}} \end{pmatrix} \]
+
+\begin{itemize}
+    \item \textbf{Homophilic Graph}: In this scenario, the probability of forming edges within the same community is higher than forming edges between different communities: $ p_\text{in} > p_{\text{out}}$
+    (e.g., \( p_\text{in} = 0.8 \), \( p_\text{out} = 0.1 \)).
+    \[ P_{\text{hom}} = \begin{pmatrix} 0.8 & 0.1 \\ 0.1 & 0.8 \end{pmatrix} \]
+    \item \textbf{Heterophilic Graph} The probability of forming edges between different communities is higher than within the same community.  $ p_\text{out} > p_{\text{in}}$
+    (e.g., \( p_\text{in} = 0.1 \), \( p_\text{out} = 0.8 \)).
+    \[ P_{\text{het}} = \begin{pmatrix} 0.1 & 0.8 \\ 0.8 & 0.1 \end{pmatrix} \]
+\end{itemize}
+
+
+\subsection*{Expected number of edges between different blocks}
+Case study: $n=20$, $r=4$, $p_{\text{out}}=0.05$
+The $r=4$-block model ($k=5$ nodes per block) describes graphs with $n=20$ nodes. $P$ has off-diagonal elements $p_{out}=0.05$.
+The expected number of edges between different blocks is given by the following formula:
+$$ E = \text{Number of pairs between different blocks} \times p_{\text{out}}$$
+
+$$ E = \frac{n^2 - r \times k^2}{2} \times p_{\text{out}} = \frac{20^2 - 4 \times 5^2}{2}\times p_{\text{out}}=150*0.05=7.5$$
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.5\textwidth]{figures/SBM_computation.png}
+    \caption{Adjacency matrix has a total of $n^2$ elements. \color{purple}$r$ blocks of size $k^2 = 25$ describe all "intra community" elements. \color{black} The total number of edges between different blocks is \color{green}$\frac{n^2 - r \times k^2}{2}$ \color{black}\textit{(we divide by 2 because the adjacency matrix is symmetric since we deal with undirected graphs)}
+    }
+    \label{fig:number_of_edges_different_blocks}
+\end{figure}
+
+The expected number of edges between nodes in different blocks of the stochastic block model, with the given parameters, is \textbf{7.5}.
+
+
 
 \section*{Question 4 : Generate non binary graphs - use the Frobenius norm}
-Instead of using the binary cross entropy loss, we can use the \textbf{mean squared error} loss on all elements of the error matrix $A-\tilde{A}$ if we want to generalize to non binary edges graphs generations.
-$$\text{MSE} = \frac{1}{n^2} \sum_{i=1}^n \sum_{j=1}^n (\tilde{A}_{ij} - A_{ij})^2$$
 \textit{The binary cross entropy loss is a good choice for classification problems}, but is not suited for regression problems.
+If we want to generalize to non binary edges graphs generations, instead of using the binary cross entropy loss, we can use the \textbf{mean squared error} loss on all elements of the error matrix $\tilde{A}-A$ 
+$$\text{MSE} = \frac{1}{n^2} \sum_{i=1}^n \sum_{j=1}^n (\tilde{A}_{ij} - A_{ij})^2$$
+
 
 % The binary cross-entropy loss function, as described in your question, is indeed well-suited for unweighted graphs where the adjacency matrix consists of binary values (0 or 1). However, for weighted graphs, where the adjacency matrix contains a range of values (not limited to just 0 or 1), a different loss function would be more appropriate.
 
@@ -101,11 +136,10 @@ $$\text{MSE} = \frac{1}{n^2} \sum_{i=1}^n \sum_{j=1}^n (\tilde{A}_{ij} - A_{ij})
 % \bibliographystyle{plain}
 % \bibliography{references}
 
-
 \section*{Task 11: Graph generation with VAE}
 See figure \ref{fig:VAE_graph_generation}
 
-\begin{figure}[h]
+\begin{figure}[H]
     \centering
     % Graph 00
     \begin{minipage}{.45\textwidth}
@@ -117,37 +151,37 @@ See figure \ref{fig:VAE_graph_generation}
   
     % Graph 01
     \begin{minipage}{.45\textwidth}
-      \includegraphics[width=0.7\linewidth]{figures/graph_01_adjacency_matrix.png}
+      \includegraphics[width=0.6\linewidth]{figures/graph_01_adjacency_matrix.png}
     \end{minipage}\hfill
     \begin{minipage}{.45\textwidth}
-      \includegraphics[width=0.7\linewidth]{figures/graph_01_generated_graph.png}
+      \includegraphics[width=0.6\linewidth]{figures/graph_01_generated_graph.png}
     \end{minipage}
   
     % Graph 02
     \begin{minipage}{.45\textwidth}
-      \includegraphics[width=0.7\linewidth]{figures/graph_02_adjacency_matrix.png}
+      \includegraphics[width=0.6\linewidth]{figures/graph_02_adjacency_matrix.png}
     \end{minipage}\hfill
     \begin{minipage}{.45\textwidth}
-      \includegraphics[width=0.7\linewidth]{figures/graph_02_generated_graph.png}
+      \includegraphics[width=0.6\linewidth]{figures/graph_02_generated_graph.png}
     \end{minipage}
   
     % Graph 03
     \begin{minipage}{.45\textwidth}
-      \includegraphics[width=0.7\linewidth]{figures/graph_03_adjacency_matrix.png}
+      \includegraphics[width=0.6\linewidth]{figures/graph_03_adjacency_matrix.png}
     \end{minipage}\hfill
     \begin{minipage}{.45\textwidth}
-      \includegraphics[width=0.7\linewidth]{figures/graph_03_generated_graph.png}
+      \includegraphics[width=0.6\linewidth]{figures/graph_03_generated_graph.png}
     \end{minipage}
   
     % Graph 04
     \begin{minipage}{.45\textwidth}
-      \includegraphics[width=0.7\linewidth]{figures/graph_04_adjacency_matrix.png}
+      \includegraphics[width=0.6\linewidth]{figures/graph_04_adjacency_matrix.png}
     \end{minipage}\hfill
     \begin{minipage}{.45\textwidth}
-      \includegraphics[width=0.7\linewidth]{figures/graph_04_generated_graph.png}
+      \includegraphics[width=0.6\linewidth]{figures/graph_04_generated_graph.png}
     \end{minipage}
 \caption{Generation of 5 graphs using the Variational graph autoencoder inference.
-The adjacency matrix is on the left, the generated graph on the right.}
+The adjacency matrix is on the left, the generated graph on the right. The sampled graphs generally look like they'd been sampled from the SBM model as expected.}
 \label{fig:VAE_graph_generation}
 \end{figure}
 
