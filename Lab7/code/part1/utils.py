@@ -72,8 +72,15 @@ def create_test_dataset(n_test=200000) -> Tuple[List[np.ndarray], List[np.ndarra
 
     Returns:
         Tuple[List[np.ndarray], List[np.ndarray]]: X_test, y_test
-
-
+        X_test: list of 20 * 10000 test samples of varying cardinalities
+        [
+            (10000, 5)
+            (10000, 10)
+            (10000, 15)
+            ...
+            (10000, 100)
+        ]
+        y_test = [(10000), (10000), (10000), ..., (10000)]
     TASK 2
     ======
 
