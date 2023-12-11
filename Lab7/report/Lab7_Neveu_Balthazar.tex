@@ -12,7 +12,8 @@
 More info:
 \href{https://github.com/balthazarneveu/MVA23_ALTEGRAD/#readme}{MVA ALTEGRAD Balthazar Neveu on Github}
 
-\section*{DeepSets: Learn to add \textit{(add to learn...)}}
+\section{DeepSets: Learn to add}
+\textit{(and add to learn...)}
 \section*{Question 1 : LSTM are not permutation invariant, therefore not recommended for sets processing}
 Permutation invariance refers to the property where the model's output does not change if the order of the input data is changed. For instance, in a permutation invariant model, the input sequence [1, 2, 3] would yield the same output as [3, 2, 1]. Permuation invaraiance is a desirable property to deal with sets.
 \newline
@@ -60,7 +61,9 @@ Special embeddings like $[1, 1, 1, 1, 0, ..., 0]$ can encode the digit $4=1+1+1+
 
 
 \section*{Question 2 : GNN vs DeepSet}
-Graph Neural Networks for graph-level tasks use graph structures to detect patterns (like graph classification) or properties. Deepsets do not consider edges between nodes except self loops.
+Graph Neural Networks for graph-level tasks use graph structures to detect patterns (like graph classification) or properties. Deepsets do not consider edges between nodes except self loops. 
+DeepSet is a permutation invariant architecture. It is not suited for graph-level tasks where structure matters.
+
 \textbf{GNN use aggregation/message passing layers to propagate information between nodes. Deepset does not.}
 \newline
 \textbf{What GNN for graph-level tasks and DeepSet have in common is the readout function (a.k.a. pooling layer).}
@@ -72,12 +75,12 @@ We can consider of DeepSet as a degenerate instance of GNN. 2 options to underst
     \item Deepset is an instance of GNN where the aggregation layers are discarded. The fully connected layers, non linear activations and readout function (global pooling) are the layers in common.
     \item Deepset is an instance of GNN where the agrregation layers are used but with a degenerate graph construction where nodes are isolated (degree 0, no edges except self loops). The adjacency matrix becomes the identity matrix.
 \end{itemize}
-Processing a set using DeepSet or a GNN with a degenerate edgeless graph construction with only self loops is mathematically equivalent.
+Processing a set using DeepSet or a GNN with a degenerate edgeless graph construction with only self loops is mathematically equivalent. \textit{Using the GNN code from lab6 would be unefficient on the set.}
 
-Finally, DeepSet is a permutation invariant architecture. It is not suited for graph-level tasks where structure matters.
+Note: Some graphs are only defined by their connectivity, no node features are required (same feature vector for all nodes). In a set, we can't consider that elements (edgeless nodes) are featureless. A feature is what inherently describes an element of a set! 
 
 \break
-
+\section{Graph generation using graph variational auto-encoders}
 \section*{Question 3 : stochastic block model (SBM)}
 \subsection*{Stochastic Block Model with $r=2$ communities/blocks}
 Edge probability matrix $ P \in {[0, 1]}^{2\times 2}$ is a symmetric matrix.
@@ -94,8 +97,10 @@ Edge probability matrix $ P \in {[0, 1]}^{2\times 2}$ is a symmetric matrix.
 
 
 \subsection*{Expected number of edges between different blocks}
-Case study: $n=20$, $r=4$, $p_{\text{out}}=0.05$
-The $r=4$-block model ($k=5$ nodes per block) describes graphs with $n=20$ nodes. $P$ has off-diagonal elements $p_{out}=0.05$.
+Case study: $n=20$, $r=4$, $p_{\text{out}}=0.05$  ($k=\frac{n}{r}=5$ nodes per block)
+
+The $r=4$ stochastic block model describes graphs with $n=20$ nodes, with $P$ has off-diagonal elements $p_{out}=0.05$.
+
 The expected number of edges between different blocks is given by the following formula:
 $$ E = \text{Number of pairs between different blocks} \times p_{\text{out}}$$
 
