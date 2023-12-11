@@ -102,8 +102,10 @@ $$\text{MSE} = \frac{1}{n^2} \sum_{i=1}^n \sum_{j=1}^n (\tilde{A}_{ij} - A_{ij})
 % \bibliography{references}
 
 
+\section*{Task 11: Graph generation with VAE}
+See figure \ref{fig:VAE_graph_generation}
 
-\begin{figure}[ht!]
+\begin{figure}[h]
     \centering
     % Graph 00
     \begin{minipage}{.45\textwidth}
@@ -144,7 +146,9 @@ $$\text{MSE} = \frac{1}{n^2} \sum_{i=1}^n \sum_{j=1}^n (\tilde{A}_{ij} - A_{ij})
     \begin{minipage}{.45\textwidth}
       \includegraphics[width=0.7\linewidth]{figures/graph_04_generated_graph.png}
     \end{minipage}
-
+\caption{Generation of 5 graphs using the Variational graph autoencoder inference.
+The adjacency matrix is on the left, the generated graph on the right.}
+\label{fig:VAE_graph_generation}
 \end{figure}
 
 \end{document}
