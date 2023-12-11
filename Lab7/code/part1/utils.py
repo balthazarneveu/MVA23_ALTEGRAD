@@ -1,9 +1,17 @@
 """
 Learning on Sets and Graph Generative Models - ALTEGRAD - Nov 2023
+
 """
 
 import numpy as np
 from typing import Tuple, List, Optional
+
+# Create a training and test dataset of integer sets for the purpose of learning to sum up integers
+# Learn to add! (... add to learn...)
+# => WARNING: this is not a joke, neural networks inherently add numbers.
+# Freezing weights to 1 and bias to 0 in the fully connected layer before the message passing
+# is equivalent to summing up the input features.
+# Learning to multiply digits would be much harder
 
 
 def create_train_dataset(
@@ -68,6 +76,7 @@ def create_test_dataset(n_test=200000) -> Tuple[List[np.ndarray], List[np.ndarra
 
     TASK 2
     ======
+
     ```text
     With regards to the test set,
     we will generate 200,000 test samples of cardinalities
