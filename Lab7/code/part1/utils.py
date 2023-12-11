@@ -7,11 +7,7 @@ import numpy as np
 from typing import Tuple, List, Optional
 
 # Create a training and test dataset of integer sets for the purpose of learning to sum up integers
-# Learn to add! (... add to learn...)
-# => WARNING: this is not a joke, neural networks inherently add numbers.
-# Freezing weights to 1 and bias to 0 in the fully connected layer before the message passing
-# is equivalent to summing up the input features.
-# Learning to multiply digits would be much harder
+
 
 
 def create_train_dataset(
@@ -20,7 +16,6 @@ def create_train_dataset(
     multiset: Optional[bool] = True
 ) -> Tuple[np.ndarray, np.ndarray]:
     """Create a training dataset of integer sets
-
     Args:
         n_train (int, optional): The number of training samples to generate. Defaults to 100000.
         max_train_card (int, optional): The maximum number of cards in each training sample. Defaults to 10.
