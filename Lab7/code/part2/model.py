@@ -42,7 +42,8 @@ class Decoder(nn.Module):
         x = self.fc_proj(x)
         adj = x.reshape(-1, self.n_nodes, self.n_nodes)
         adj = 0.5*(adj + adj.transpose(1, 2))
-        # sigmoid will be added in the loss function
+        # (A + A^T)/2 => trick make A symmetric
+        # sigmoid will be added in the loss function (check VariationalAutoEncoder.decode)
 
         return adj
 
@@ -97,8 +98,21 @@ class VariationalAutoEncoder(nn.Module):
         self.decoder = Decoder(latent_dim, hidden_dim_dec, n_layers_dec, n_max_nodes)
 
     def reparameterize(self, mu, logvar, eps_scale=1.):
+        """Trick to backpropagate through the sampling process
+
+        Question: How to learn in presence of stochastic variables?
+        Answer: Reparameterization trick (Kingma and Welling, 2013)
+
+        Sample from a standard normal distribution
+        - and shift by mu
+        - and scale by "std"
+
+        https://arxiv.org/abs/1312.6114
+        """
         if self.training:
-            std = logvar.mul(0.5).exp_()
+            # We do not parameterize directly with sigma because sigma must be positive
+            # Instead we train on logvar where sigma=exp(0.5*logvar) => no constraint on logvar
+            std = logvar.mul(0.5).exp_()  # sigma
             eps = torch.randn_like(std) * eps_scale
             return eps.mul(std).add_(mu)
         else:
@@ -111,6 +125,9 @@ class VariationalAutoEncoder(nn.Module):
         return adj
 
     def loss_function(self, adj, x, idx, y, beta=0.05):
+        """Loss function for the variational autoencoder
+        Part of the nn.module as it needs acess to forward pass variables
+        """
         x_g = self.encoder(adj, x, idx)
 
         # Task 9
@@ -128,6 +145,8 @@ class VariationalAutoEncoder(nn.Module):
             pos_weight=torch.tensor(1./0.4)
         )
         kld = -0.5 * torch.sum(1 + logvar - mu.pow(2) - logvar.exp())
+        # Force latent prior to look like a standard normal distribution using
+        # Kulback Leibler divergence
         loss = recon + beta*kld
 
         return loss, recon, kld

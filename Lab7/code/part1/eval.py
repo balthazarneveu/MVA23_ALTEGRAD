@@ -94,7 +94,7 @@ def evaluate(results_path=RESULTS_ROOT, **kwargs):
     return results
 
 
-def plot_results(results_dict, extra_tile=""):
+def plot_results(results_dict, extra_tile: str = ""):
     # Task 7
     plt.figure(figsize=(10, 5))
     plt.grid()
@@ -121,8 +121,8 @@ def plot_results(results_dict, extra_tile=""):
 
 if __name__ == "__main__":
     all_results = {}
-    selection = range(20)
-    # selection = [19]
+    # selection = range(20)
+    selection = [19]
     for n_epoch in selection:
         results = evaluate(RESULTS_ROOT/"seed=42"/f"{n_epoch}")
         results["epoch"] = n_epoch

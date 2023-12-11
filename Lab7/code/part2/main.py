@@ -147,11 +147,13 @@ for epoch in range(1, epochs+1):
 autoencoder.eval()
 autoencoder.cpu()
 # Task 11
+# Generate 5 graphs 
+# -> Samples 5 latent vectors from the latent prior distribution (Gaussian with mean 0 and variance 1)
 z = torch.randn(5, latent_dim)
 adj = autoencoder.decoder(z)
 
 
-# Create and visualize graphs
+# Create, visualize/save 5 graphs
 for i in range(adj.size(0)):
     A = adj[i, :, :].detach().cpu().numpy()
     A[A >= 0.5] = 1
