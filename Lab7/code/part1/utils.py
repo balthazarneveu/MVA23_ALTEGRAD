@@ -9,7 +9,6 @@ from typing import Tuple, List, Optional
 # Create a training and test dataset of integer sets for the purpose of learning to sum up integers
 
 
-
 def create_train_dataset(
     n_train: int = 100000,
     max_train_card: int = 10,
@@ -54,10 +53,10 @@ def create_train_dataset(
             card = min(card, len(sample_set))
             X_train[idx, -card:] = sample_set[:card]
     y_train = X_train.sum(axis=1)  # :-) use numpy vectorization for such operations
-    return X_train, y_train
+    return X_train.astype(np.int16), y_train.astype(np.int16)
 
 
-def create_test_dataset(n_test=200000) -> Tuple[List[np.ndarray], List[np.ndarray]]:
+def create_test_dataset(n_test=200000, step_test_card: int = 5) -> Tuple[List[np.ndarray], List[np.ndarray], List[int]]:
     """Create a test dataset of varying but balanced cardinalities
     The puprose is to test if model can generalize to unseen cardinalities,
     independently of the cardinality of the training set.
@@ -66,7 +65,7 @@ def create_test_dataset(n_test=200000) -> Tuple[List[np.ndarray], List[np.ndarra
         n_test (int, optional): number of test set samples. Defaults to 200000.
 
     Returns:
-        Tuple[List[np.ndarray], List[np.ndarray]]: X_test, y_test
+        Tuple[List[np.ndarray], List[np.ndarray]], List[int]: X_test, y_test
         X_test: list of 20 * 10000 test samples of varying cardinalities
         [
             (10000, 5)
@@ -92,7 +91,7 @@ def create_test_dataset(n_test=200000) -> Tuple[List[np.ndarray], List[np.ndarra
     # Task 2
     min_test_card = 5
     max_test_card = 101
-    step_test_card = 5
+    
     cards = range(min_test_card, max_test_card, step_test_card)
     # [5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 85, 90, 95, 100]
     n_samples_per_card = n_test // len(cards)  # 10000
@@ -104,13 +103,13 @@ def create_test_dataset(n_test=200000) -> Tuple[List[np.ndarray], List[np.ndarra
         y = x.sum(axis=1)
         X_test.append(x)
         y_test.append(y)
-    return X_test, y_test
+    return X_test, y_test, list(cards)
 
 
 if __name__ == '__main__':
     x_train, y_train = create_train_dataset(multiset=True)
     assert x_train.shape == (100000, 10)
-    X_test, y_test = create_test_dataset()
+    X_test, y_test, cards = create_test_dataset()
     for idx in range(len(X_test)):
         print(X_test[idx].shape)
     # print(X_test[1].shape)

@@ -4,7 +4,7 @@ Learning on Sets and Graph Generative Models - ALTEGRAD - Nov 2023
 
 import torch
 import torch.nn as nn
-
+import logging
 # Learn to add! (... add to learn...)
 
 # => WARNING: this is not a joke,
@@ -86,7 +86,6 @@ class LSTM(nn.Module):
 
         self.embedding = nn.Embedding(input_dim, embedding_dim)
         self.lstm = nn.LSTM(embedding_dim, hidden_dim, batch_first=True)
-        # num_layers=1, bidirectional=False
         self.fc = nn.Linear(hidden_dim, output_dim)
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
@@ -118,8 +117,17 @@ class LSTM(nn.Module):
         https://pytorch.org/docs/stable/generated/torch.nn.LSTM.html
         """
         # Task 4
-        x = self.embedding(x)  # [N, L, embedding_dim]
-        _, x, _ = self.lstm(x)  # -> [N, 1*1*hidden_dim] (batch_first=True)
-        x = self.fc(x)  # [N, hidden_dim] -> [N, 1]
+        logging.debug(f"{x.shape} in")
 
+        x = self.embedding(x)  # [N, L, embedding_dim]
+
+        logging.debug(f"{x.shape} embedding out")
+        _, (x, _) = self.lstm(x)
+        # -> [1*1, N, *hidden_dim] (batch_first=True)
+        # num_layers=1, bidirectional=False
+        x = x.squeeze()  # remove the first useless dimension
+        logging.debug(f"{x.shape} LSTM out")
+
+        x = self.fc(x)  # [N, hidden_dim] -> [N, 1]
+        # in reality [1, N, 1]
         return x.squeeze()
